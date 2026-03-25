@@ -1,0 +1,50 @@
+#! /usr/bin/python
+#    Copyright (C) <2025>  <Johannes Löbbecke>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import argparse
+import time
+import os
+import signal
+import sys
+import json
+import re
+import logging
+import xml.etree.ElementTree as ET
+from util import exists_by_label, get_ancestors, compare_ele, add_start_end, combine_sub_trees
+from reqparser import parse_requirements
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('process', help="Path to the process tree .xml file")
+args = parser.parse_args()
+
+## File Loading
+xml = ET.parse(args.process)
+
+## data preparation
+namespace1 = {"ns0": "http://cpee.org/ns/description/1.0"}
+namespace2 = {"ns1": "http://cpee.org/ns/properties/2.0"} 
+
+req = xml.find('.//ns1:requirements', namespace2)
+xml = xml.find('.//ns0:description', namespace1)
+print(xml)
+print(req)
+requirements = parse_requirements(req.text)
+xml = add_start_end(xml)
+xml = combine_sub_trees(xml)
+## Check if combining sub trees reduces assurance level
+verified_requirements = []
+for counter, req in enumerate(requirements):
+    print(req)
