@@ -88,3 +88,5 @@ class HashTable:
 
 hash_t = HashTable(20)
 hash_t.load_disk("Constraints.json")
+
+## HashMap is used to store which constraints have to be started for which activity

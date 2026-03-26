@@ -23,12 +23,11 @@ import re
 import uuid
 import logging
 from hashmap import hash_t 
-from patterns import *
+from patterns import MaxExecTime, Recurring, WaitForEvent
 import xml.etree.ElementTree as ET
-from fastapi import FastAPI, File, UploadFile, Request, Form
+from fastapi import FastAPI,  Request
 from pydantic import BaseModel
 from multiprocessing import Process
-from fastapi.responses import HTMLResponse, JSONResponse
 
 class Model(BaseModel):
     cpee: str
@@ -45,7 +44,9 @@ class Model(BaseModel):
 app = FastAPI()
 
 mapping = {
-    "min_time_between" : min_time_between
+    "max_exec_time" : MaxExecTime,
+    "recurring" : Recurring,
+    "wait_for_event" : WaitForEvent
 }
 
 @app.post("/voter")
