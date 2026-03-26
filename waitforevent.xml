@@ -1,0 +1,71 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+    <executionhandler>ruby</executionhandler>
+    <dataelements/>
+    <endpoints>
+        <timeout>https-post://cpee.org/services/timeout.php</timeout>
+        <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+        <task>TaskID</task>
+    </endpoints>
+    <attributes>
+        <guarded>none</guarded>
+        <info>WaitForEvent</info>
+        <modeltype>CPEE</modeltype>
+        <theme>extended</theme>
+        <creator>Christine Ashcreek</creator>
+        <guarded_id/>
+        <author>Christine Ashcreek</author>
+        <model_uuid>d55cdfcc-7464-4a57-b0e9-3437ca440d6d</model_uuid>
+        <model_version/>
+        <design_dir>Staff.dir/Loebbi.dir/Voting.dir/Patterns.dir</design_dir>
+        <design_stage>development</design_stage>
+    </attributes>
+    <description>
+        <description xmlns="http://cpee.org/ns/description/1.0">
+            <call id="a1" endpoint="task">
+                <parameters>
+                    <label>Task</label>
+                    <color/>
+                    <method>:post</method>
+                    <arguments/>
+                </parameters>
+                <annotations>
+                    <_generic/>
+                    <_logging_behavior>
+                        <_exclude>false</_exclude>
+                        <_include>false</_include>
+                    </_logging_behavior>
+                    <_timing>
+                        <_timing_weight/>
+                        <_timing_avg/>
+                        <explanations/>
+                    </_timing>
+                    <_shifting>
+                        <_shifting_type>Duration</_shifting_type>
+                    </_shifting>
+                    <_context_data_analysis>
+                        <probes/>
+                        <ips/>
+                    </_context_data_analysis>
+                    <report>
+                        <url/>
+                    </report>
+                    <_notes>
+                        <_notes_general/>
+                    </_notes>
+                </annotations>
+                <documentation>
+                    <input/>
+                    <output/>
+                    <implementation>
+                        <description/>
+                    </implementation>
+                </documentation>
+            </call>
+        </description>
+    </description>
+    <transformation>
+        <description type="copy"/>
+        <dataelements type="none"/>
+        <endpoints type="none"/>
+    </transformation>
+</testset>
