@@ -17,6 +17,8 @@ def _get_semantic_model():
 
 
 def semantic_simil(value, endpoint_keys, endpoint_embeddings=None):
+    print(f"[semantic_simil] input value: {value}")
+    print(f"[semantic_simil] endpoint candidates: {endpoint_keys}")
     model = _get_semantic_model()
     value_emb = model.encode(value)
     if endpoint_embeddings is None:
@@ -27,13 +29,18 @@ def semantic_simil(value, endpoint_keys, endpoint_embeddings=None):
     for idx, endpoint in enumerate(endpoint_keys):
         endpoint_emb = endpoint_embeddings[idx]
         score = cos_sim(value_emb, endpoint_emb)[0][0].item()
+        print(f"[semantic_simil] score('{value}', '{endpoint}') = {score}")
         if score > best_score:
             best_score = score
             best_match = endpoint
+    print(f"[semantic_simil] best match for '{value}' -> '{best_match}' (score={best_score})")
     return best_match
 
 def replace_endpoints(job, endpoints):
+    print(f"[replace_endpoints] incoming job: {job}")
+    print(f"[replace_endpoints] available endpoints: {endpoints}")
     if not isinstance(job, dict) or not isinstance(endpoints, dict) or len(endpoints) == 0:
+        print("[replace_endpoints] skipped: invalid job/endpoints input")
         return job
 
     model = _get_semantic_model()
@@ -46,11 +53,17 @@ def replace_endpoints(job, endpoints):
 
         # Replace endpoint placeholders used in transformer pattern jobs.
         if key.endswith("_Endpoint"):
+            print(f"[replace_endpoints] resolving field '{key}' with value '{value}'")
             if value in endpoints:
                 job[key] = endpoints[value]
+                print(f"[replace_endpoints] direct match: '{value}' -> '{job[key]}'")
             else:
                 matched_key = semantic_simil(value, endpoint_keys, endpoint_embeddings)
                 if matched_key is not None:
                     job[key] = endpoints[matched_key]
+                    print(f"[replace_endpoints] semantic match: '{value}' -> key '{matched_key}' -> '{job[key]}'")
+                else:
+                    print(f"[replace_endpoints] no semantic match found for '{value}'")
 
+    print(f"[replace_endpoints] updated job: {job}")
     return job
