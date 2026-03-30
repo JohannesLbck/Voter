@@ -1,6 +1,6 @@
 {
     "R1"=>"precedence('Collect Blood', 'Identify Patient')",
     "R2"=>"recurring('Collect Blood','Mix with anticoagulant', 10)",
-    "R3"=>"maxExecTime('Collect Blood', 300)",
+    "R3"=>"maxExecTime('Collect Blood','Abort Blood Collection', 300)",
     "R4"=>"recurring('Collect Blood', 'Invert Blood Container', 30)"
 }
