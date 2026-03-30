@@ -105,7 +105,7 @@ def by_due_date_explicit(tree, a, timestamp):
     return None
 
 ## checks both annotated and explicit, returns true if either
-def by_due_date(tree, a, timestamp, c = None)
+def by_due_date(tree, a, timestamp, c = None):
     return None
 
 
@@ -113,7 +113,8 @@ def by_due_date(tree, a, timestamp, c = None)
 
 
 
-
+def executed_by(args):
+    return None
 
 # These are just left empty to keep compatability with the full ASTs
 def exists(tree, a):#

@@ -23,7 +23,6 @@ VERIFICATION_FUNCTIONS = {
     "leads_to": leads_to,
     "precedence": precedence,
     "leads_to_absence": leads_to_absence,
-    "precedence_absence": precedence_absence,
     "parallel": parallel,
     "executed_by": executed_by,
     "executed_by_identify": executed_by_identify,
