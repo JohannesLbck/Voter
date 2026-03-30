@@ -68,6 +68,7 @@ async def transform(request: Request):
         event = form["event"]
         jobs = {}
         for counter, req in enumerate(requirements):
+            print(f'Verifying Pattern {req}')
             job = traverse(req, tree=xml)
             if job is not None:
                 job = replace_endpoints(job, endpoints)
