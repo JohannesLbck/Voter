@@ -7,13 +7,18 @@ from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
 
 
-def semantic_simil(value, endpoints):
-    model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-    value_emb = model.encode(value)
+_SEMANTIC_MODEL = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+
+
+def semantic_simil(value, endpoint_keys, endpoint_embeddings=None):
+    value_emb = _SEMANTIC_MODEL.encode(value)
+    if endpoint_embeddings is None:
+        endpoint_embeddings = _SEMANTIC_MODEL.encode(endpoint_keys)
+
     best_match = None
     best_score = -1
-    for endpoint in endpoints:
-        endpoint_emb = model.encode(endpoint)
+    for idx, endpoint in enumerate(endpoint_keys):
+        endpoint_emb = endpoint_embeddings[idx]
         score = cos_sim(value_emb, endpoint_emb)[0][0].item()
         if score > best_score:
             best_score = score
@@ -21,6 +26,11 @@ def semantic_simil(value, endpoints):
     return best_match
 
 def replace_endpoints(job, endpoints):
+    if not isinstance(job, dict) or not isinstance(endpoints, dict) or len(endpoints) == 0:
+        return job
+
+    endpoint_keys = list(endpoints.keys())
+    endpoint_embeddings = _SEMANTIC_MODEL.encode(endpoint_keys)
 
     for key, value in list(job.items()):
         if not isinstance(value, str):
@@ -31,6 +41,8 @@ def replace_endpoints(job, endpoints):
             if value in endpoints:
                 job[key] = endpoints[value]
             else:
-                job[key] = semantic_simil(value, endpoints)
+                matched_key = semantic_simil(value, endpoint_keys, endpoint_embeddings)
+                if matched_key is not None:
+                    job[key] = endpoints[matched_key]
 
     return job
