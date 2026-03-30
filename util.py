@@ -5,4 +5,13 @@ from utils.time_util import timeouts_exists, sync_exists, parse_timestamp, wait_
 from utils.general_util import transform_log, find_subprocess, combine_sub_trees, add_start_end
 
 def replace_endpoints(job, endpoints):
-    pass
+
+    for key, value in list(job.items()):
+        if not isinstance(value, str):
+            continue
+
+        # Replace endpoint placeholders used in transformer pattern jobs.
+        if key.endswith("_Endpoint") and value in endpoints:
+            job[key] = endpoints[value]
+
+    return job

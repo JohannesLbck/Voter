@@ -70,6 +70,7 @@ async def transform(request: Request):
         for counter, req in enumerate(requirements):
             job = traverse(req, tree=xml)
             if job is not None:
+                job = replace_endpoints(job, endpoints)
                 caller_id = job["CallerID"]
                 if caller_id not in jobs:
                     jobs[caller_id] = []
@@ -84,14 +85,14 @@ def run_server():
     if pid != 0:
         return
     print('Starting ' + str(os.getpid()))
-    print(os.getpid(), file=open('voter.pid', 'w'))
-    uvicorn.run("voter:app", port=9322, log_level="info")
+    print(os.getpid(), file=open('transformer.pid', 'w'))
+    uvicorn.run("transformer:app", port=9322, log_level="info")
 
 if __name__ == "__main__":
-    if os.path.exists('voter.pid'):
-      with open("voter.pid","r") as f: pid =f.read()
+    if os.path.exists('transformer.pid'):
+      with open("transformer.pid","r") as f: pid =f.read()
       print('Killing ' + str(int(pid)))
-      os.remove('voter.pid')
+      os.remove('transformer.pid')
       os.kill(int(pid),signal.SIGINT)
     else:
       proc = Process(target=run_server, args=(), daemon=True)
