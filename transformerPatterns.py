@@ -53,6 +53,7 @@ def maxExecTime(tree, a, b, time):
         a_id = a_ele.get("id")
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
+        b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
         return {"CallerID" : a_id,
                     "Pattern" : "maxExecTime",
                     "Time" : time,
