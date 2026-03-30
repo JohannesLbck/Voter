@@ -58,7 +58,7 @@ async def transform(request: Request):
         try:
             req = notification["content"]["attributes"]["requirements"]
         except:
-            return (400, "No requirements were passed in the notification, cannot perform transformation without requirements")
+            print("No requirements were passed in the notification, cannot perform transformation without requirements")
         requirements = parse_requirements(req)
         xml = ET.fromstring(notification["content"]["description"])
         xml = add_start_end(xml)
@@ -75,6 +75,7 @@ async def transform(request: Request):
                 if caller_id not in jobs:
                     jobs[caller_id] = []
                 jobs[caller_id].append(job)
+                print(job)
         for key,value in jobs.items():
             pass
     return
