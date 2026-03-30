@@ -35,10 +35,11 @@ coverage.xml
 *.log
 
 # Runtime / process files
-voter.pid
+*.pid
 
 # IDE / editor
 .vscode/
 .idea/
 *.swp
 *.swo
+
