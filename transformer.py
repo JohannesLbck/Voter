@@ -18,6 +18,7 @@ import time
 import os
 import signal
 import json
+import multiprocessing as mp
 from hashmap import hash_t 
 from patterns import MaxExecTime, Recurring, WaitForEvent
 from util import add_start_end, combine_sub_trees, replace_endpoints
@@ -83,11 +84,6 @@ async def transform(request: Request):
 
 
 def run_server():
-    pid = os.fork()
-    if pid != 0:
-        return
-    print('Starting ' + str(os.getpid()))
-    print(os.getpid(), file=open('transformer.pid', 'w'))
     uvicorn.run("transformer:app", port=9322, log_level="info")
 
 if __name__ == "__main__":
@@ -97,6 +93,9 @@ if __name__ == "__main__":
       os.remove('transformer.pid')
       os.kill(int(pid),signal.SIGINT)
     else:
-      proc = Process(target=run_server, args=(), daemon=True)
-      proc.start()
-      proc.join()
+        mp.set_start_method("spawn", force=True)
+        proc = Process(target=run_server, args=(), daemon=True)
+        proc.start()
+        print('Starting ' + str(proc.pid))
+        print(proc.pid, file=open('transformer.pid', 'w'))
+        proc.join()

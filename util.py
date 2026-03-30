@@ -6,14 +6,21 @@ from utils.general_util import transform_log, find_subprocess, combine_sub_trees
 from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import cos_sim
 
+_SEMANTIC_MODEL = None
 
-_SEMANTIC_MODEL = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+
+def _get_semantic_model():
+    global _SEMANTIC_MODEL
+    if _SEMANTIC_MODEL is None:
+        _SEMANTIC_MODEL = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+    return _SEMANTIC_MODEL
 
 
 def semantic_simil(value, endpoint_keys, endpoint_embeddings=None):
-    value_emb = _SEMANTIC_MODEL.encode(value)
+    model = _get_semantic_model()
+    value_emb = model.encode(value)
     if endpoint_embeddings is None:
-        endpoint_embeddings = _SEMANTIC_MODEL.encode(endpoint_keys)
+        endpoint_embeddings = model.encode(endpoint_keys)
 
     best_match = None
     best_score = -1
@@ -29,8 +36,9 @@ def replace_endpoints(job, endpoints):
     if not isinstance(job, dict) or not isinstance(endpoints, dict) or len(endpoints) == 0:
         return job
 
+    model = _get_semantic_model()
     endpoint_keys = list(endpoints.keys())
-    endpoint_embeddings = _SEMANTIC_MODEL.encode(endpoint_keys)
+    endpoint_embeddings = model.encode(endpoint_keys)
 
     for key, value in list(job.items()):
         if not isinstance(value, str):
