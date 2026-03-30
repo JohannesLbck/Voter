@@ -38,6 +38,7 @@ def recurring(tree, a, b, t):
     if a_ele is not None:
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
+        b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
         return {"CallerID" : a_ele.get("id"),
                     "Pattern" : "recurring",
                     "Time" : t,
@@ -70,6 +71,7 @@ def max_time_between(tree, a, b, time, c = None):
         if bpath is not None:
             c_path = exists_by_label(tree, c)
             c_endpoint_key = c_path.get("endpoint") if c_path is not None else c
+            c_endpoint_key = c_endpoint_key if c_endpoint_key is not "" else c
             return {"CallerID" : apath.get("id"),
                     "Pattern" : "max_time_between",
                     "Time" : time,
