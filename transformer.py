@@ -18,6 +18,8 @@ import time
 import os
 import signal
 import json
+import logging
+import argparse
 import multiprocessing as mp
 from hashmap import hash_t 
 from patterns import MaxExecTime, Recurring, WaitForEvent
@@ -28,6 +30,8 @@ from pydantic import BaseModel
 from multiprocessing import Process
 from reqparser import parse_requirements
 from ComplianceAST import traverse
+
+logger = logging.getLogger(__name__)
 
 class Model(BaseModel):
     cpee: str
@@ -54,12 +58,11 @@ async def transform(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
         endpoints = notification["content"]["endpoints"]
-        print(f'endpoints: {endpoints}')
-        print("--------------------")
+        logger.debug(f'endpoints: {endpoints}')
         try:
             req = notification["content"]["attributes"]["requirements"]
         except:
-            print("No requirements were passed in the notification, cannot perform transformation without requirements")
+            logger.error("No requirements were passed in the notification, cannot perform transformation without requirements")
         requirements = parse_requirements(req)
         xml = ET.fromstring(notification["content"]["description"])
         xml = add_start_end(xml)
@@ -69,7 +72,7 @@ async def transform(request: Request):
         event = form["event"]
         jobs = {}
         for counter, req in enumerate(requirements):
-            print(f'Verifying Pattern {req}')
+            logger.info(f'Verifying Pattern {req}')
             job = traverse(req, tree=xml)
             if job is not None:
                 job = replace_endpoints(job, endpoints)
@@ -77,25 +80,40 @@ async def transform(request: Request):
                 if caller_id not in jobs:
                     jobs[caller_id] = []
                 jobs[caller_id].append(job)
-                print(job)
+                logger.info(f'Generated job: {job}')
         for key,value in jobs.items():
             pass
     return
 
 
-def run_server():
+def _configure_logging(verbose=False):
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format="%(levelname)s:%(name)s:%(message)s",
+        force=True,
+    )
+
+
+def run_server(verbose=False):
+    _configure_logging(verbose)
     uvicorn.run("transformer:app", port=9322, log_level="info")
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run transformer service")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose debug logging")
+    args = parser.parse_args()
+    _configure_logging(args.verbose)
+
     if os.path.exists('transformer.pid'):
       with open("transformer.pid","r") as f: pid =f.read()
-      print('Killing ' + str(int(pid)))
+      logger.info('Killing ' + str(int(pid)))
       os.remove('transformer.pid')
       os.kill(int(pid),signal.SIGINT)
     else:
         mp.set_start_method("spawn", force=True)
-        proc = Process(target=run_server, args=(), daemon=True)
+        proc = Process(target=run_server, args=(args.verbose,), daemon=True)
         proc.start()
-        print('Starting ' + str(proc.pid))
+        logger.info('Starting ' + str(proc.pid))
         print(proc.pid, file=open('transformer.pid', 'w'))
         proc.join()
