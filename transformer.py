@@ -111,7 +111,7 @@ async def vote_syncing_before(request: Request):
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="before", callback=callback)
         requests.put(callback, headers={"CPEE-CALLBACK": "true"})
-        return Response(headers={"CPEE-CALLBACK": "true"})
+        return {"true"}
 
 @app.post("/vote_syncing_after")
 async def vote_syncing_after(request: Request):
