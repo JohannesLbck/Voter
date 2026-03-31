@@ -1,7 +1,10 @@
 import logging
+import requests
 from patterns import MaxExecTime, Recurring, WaitForEvent
 
 logger = logging.getLogger(__name__)
+
+SUBPROCESS_URL = "https://cpee.org/flow/start/url/"
 
 
 class Jobs:
@@ -18,7 +21,8 @@ class Jobs:
         """Open instance of a max exec time pattern."""
         logger.info(f'Open max exec time instance: {job}')
         tree = MaxExecTime(job["Time"], job["B_Endpoint"])
-        # TODO: use tree to open instance
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running", "xml": tree})
+        print(f'open_max_exec_time response: {response.status_code} {response.text}')
         # TODO: add the checking job to the hashmap
         pass
 
@@ -26,7 +30,8 @@ class Jobs:
         """Open instance of a recurring pattern."""
         logger.info(f'Open recurring instance: {job}')
         tree = Recurring(job["B_Endpoint"], job["B_Endpoint"], job["Time"])
-        # TODO: use tree to open instance
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running", "xml": tree})
+        print(f'open_recurring response: {response.status_code} {response.text}')
         # TODO: add the checking job to the hashmap
         pass
 
@@ -48,7 +53,8 @@ class Jobs:
         """Open instance of a wait for event pattern."""
         logger.info(f'Open wait for event instance: {job}')
         tree = WaitForEvent(job["B_Endpoint"])
-        # TODO: use tree to open instance
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running", "xml": tree})
+        print(f'open_wait_for_event response: {response.status_code} {response.text}')
         # TODO: add the checking job to the hashmap
         pass
 
