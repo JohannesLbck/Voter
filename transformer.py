@@ -13,6 +13,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import uvicorn
 import time
 import os
@@ -26,7 +27,7 @@ from patterns import MaxExecTime, Recurring, WaitForEvent
 from jobs import Jobs
 from util import add_start_end, combine_sub_trees, replace_endpoints
 import xml.etree.ElementTree as ET
-from fastapi import FastAPI,  Request
+from fastapi import FastAPI, Request, Response
 from pydantic import BaseModel
 from multiprocessing import Process
 from reqparser import parse_requirements
@@ -103,9 +104,10 @@ async def vote_syncing_before(request: Request):
         jobs = hash_t.get(hash_key)
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            return ## What is the actual continue message?
+            return Response(headers={"CPEE-CALLBACK": "true"})
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="before")
+        return Response(headers={"CPEE-CALLBACK": "true"})
 
 @app.post("/vote_syncing_after")
 async def vote_syncing_after(request: Request):
@@ -118,9 +120,10 @@ async def vote_syncing_after(request: Request):
         jobs = hash_t.get(hash_key)
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            return 
+            return Response(headers={"CPEE-CALLBACK": "true"})
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="after")
+        return Response(headers={"CPEE-CALLBACK": "true"})
 
 def _configure_logging(verbose=False):
     level = logging.DEBUG if verbose else logging.INFO
