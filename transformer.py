@@ -64,6 +64,7 @@ async def transform(request: Request):
         except:
             logger.error("No requirements were passed in the notification, cannot perform transformation without requirements")
         requirements = parse_requirements(req)
+        print(notification)
         xml = ET.fromstring(notification["content"]["description"])
         xml = add_start_end(xml)
         xml= combine_sub_trees(xml)
