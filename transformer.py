@@ -23,6 +23,7 @@ import argparse
 import multiprocessing as mp
 from hashmap import hash_t 
 from patterns import MaxExecTime, Recurring, WaitForEvent
+from jobs import Jobs
 from util import add_start_end, combine_sub_trees, replace_endpoints
 import xml.etree.ElementTree as ET
 from fastapi import FastAPI,  Request
@@ -46,6 +47,7 @@ class Model(BaseModel):
     instance_name: str
 
 app = FastAPI()
+jobs_handler = Jobs()
 
 mapping = {
     "max_exec_time" : MaxExecTime,
@@ -90,8 +92,23 @@ async def transform(request: Request):
         hash_t.save_disk("Constraints.json")
     return
 
-@app.post("/vote")
-async def vote(request: Request):
+@app.post("/vote_syncing_before")
+async def vote_syncing_before(request: Request):
+    async with request.form() as form:
+        notification = json.loads(form["notification"])
+        instance_id = str(notification["instance"])
+        print(notification)
+        caller_id = "temp"
+        hash_key = f"{caller_id}{instance_id}"
+        jobs = hash_t.get(hash_key)
+        if jobs == "No record found":
+            logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
+            return ## What is the actual continue message?
+        logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
+        jobs_handler.handle_jobs(jobs, phase="before")
+
+@app.post("/vote_syncing_after")
+async def vote_syncing_after(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
         instance_id = str(notification["instance"])
@@ -103,10 +120,7 @@ async def vote(request: Request):
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
             return
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
-        for job in jobs:
-            ## create the custom tree here which will be instanciated
-            ## Use a mapping between patterns here so the job can be correctly parsed
-            print(job)
+        jobs_handler.handle_jobs(jobs, phase="after")
 
 def _configure_logging(verbose=False):
     level = logging.DEBUG if verbose else logging.INFO

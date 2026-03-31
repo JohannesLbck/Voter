@@ -1,7 +1,7 @@
 <testset xmlns="http://cpee.org/ns/properties/2.0">
   <executionhandler>ruby</executionhandler>
   <dataelements>
-    <consent>True</consent>
+    <consent>true</consent>
     <venepuncture_status>succesfull</venepuncture_status>
   </dataelements>
   <endpoints>
@@ -21,17 +21,17 @@
   </endpoints>
   <attributes>
     <guarded>none</guarded>
-    <info>RunningExampleClean</info>
-    <theme>packed</theme>
     <modeltype>CPEE</modeltype>
+    <theme>packed</theme>
     <guarded_id/>
+    <info>RunningExampleClean</info>
     <creator>Christine Ashcreek</creator>
     <author>Christine Ashcreek</author>
     <model_uuid>a4252955-ad0e-433c-9cdf-3677fa2e7239</model_uuid>
     <model_version/>
     <design_stage>development</design_stage>
     <design_dir>Staff.dir/Loebbi.dir/Voting.dir</design_dir>
-    <requirements>{     "R1"=&gt;"precedence('Collect Blood', 'Identify Patient')",     "R2"=&gt;"recurring('Collect Blood','Mix with anticoagulant', 10)",     "R3"=&gt;"maxExecTime('Collect Blood', 300)",     "R4"=&gt;"recurring('Collect Blood', 'Invert Blood Container', 30)" }</requirements>
+    <requirements>{     "R1"=&gt;"precedence('Collect Blood', 'Identify Patient')",     "R2"=&gt;"recurring('Collect Blood','Mix with anticoagulant', 10)",     "R3"=&gt;"maxExecTime('Collect Blood','Abort Blood Collection', 300)",     "R4"=&gt;"recurring('Collect Blood', 'Invert Blood Container', 30)" }</requirements>
   </attributes>
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
@@ -448,7 +448,7 @@
                 </documentation>
               </call>
               <choose mode="exclusive" label="">
-                <alternative eid="e4" condition="data.venepuncture_status = &quot;failed&quot;">
+                <alternative eid="e4" condition="data.venepuncture_status == &quot;failed&quot;">
                   <_probability>
                     <_probability_min/>
                     <_probability_max/>
@@ -970,7 +970,12 @@
         <event>change</event>
       </topic>
     </subscription>
-    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_vote" url="https://power.bpm.cit.tum.de/runtime/vote">
+    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_vote_syncing_before" url="https://power.bpm.cit.tum.de/runtime/vote_syncing_before">
+      <topic id="activity">
+        <vote>syncing_before</vote>
+      </topic>
+    </subscription>
+    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_vote_syncing_after" url="https://power.bpm.cit.tum.de/runtime/vote_syncing_after">
       <topic id="activity">
         <vote>syncing_after</vote>
       </topic>
