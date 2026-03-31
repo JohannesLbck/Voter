@@ -1,13 +1,27 @@
 <testset xmlns="http://cpee.org/ns/properties/2.0">
   <executionhandler>ruby</executionhandler>
-  <dataelements/>
+  <dataelements>
+    <consent>True</consent>
+    <venepuncture_status>succesfull</venepuncture_status>
+  </dataelements>
   <endpoints>
     <timeout>https-post://cpee.org/services/timeout.php</timeout>
     <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+    <identifyvenepuncturesite>https-post://cpee.org/services/timeout.php</identifyvenepuncturesite>
+    <disinfectvenepuncturesite>https-post://cpee.org/services/timeout.php</disinfectvenepuncturesite>
+    <consentrequest>https-post://cpee.org/services/timeout.php</consentrequest>
+    <waituntildried>https-post://cpee.org/services/timeout.php</waituntildried>
+    <abortbloodcollection>https-post://cpee.org/services/timeout.php</abortbloodcollection>
+    <attemptvenepuncture>https-post://cpee.org/services/timeout.php</attemptvenepuncture>
+    <invertcontainer>https-post://cpee.org/services/timeout.php</invertcontainer>
+    <mixwithanticoagulant>https-post://cpee.org/services/timeout.php</mixwithanticoagulant>
+    <monitorbleeding>https-post://cpee.org/services/timeout.php</monitorbleeding>
+    <informphysician>https-post://cpee.org/services/timeout.php</informphysician>
+    <collectblood>https-post://cpee.org/services/timeout.php</collectblood>
   </endpoints>
   <attributes>
     <guarded>none</guarded>
-    <info>RunningExample</info>
+    <info>RunningExampleClean</info>
     <theme>packed</theme>
     <modeltype>CPEE</modeltype>
     <guarded_id/>
@@ -21,15 +35,21 @@
   </attributes>
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
-      <call id="a1" endpoint="">
+      <call id="a1" endpoint="identifyvenepuncturesite">
         <parameters>
           <label>Identify Venepunture Site</label>
           <color/>
-          <method>:post</method>
-          <arguments/>
+          <arguments>
+            <timeout>1</timeout>
+            <data/>
+          </arguments>
         </parameters>
         <annotations>
           <_generic/>
+          <_logging_behavior>
+            <_exclude>false</_exclude>
+            <_include>false</_include>
+          </_logging_behavior>
           <_timing>
             <_timing_weight/>
             <_timing_avg/>
@@ -57,15 +77,21 @@
           </implementation>
         </documentation>
       </call>
-      <call id="a2" endpoint="">
+      <call id="a2" endpoint="disinfectvenepuncturesite">
         <parameters>
           <label>Disinfect Venepunture Site</label>
           <color/>
-          <method>:post</method>
-          <arguments/>
+          <arguments>
+            <timeout>1</timeout>
+            <data/>
+          </arguments>
         </parameters>
         <annotations>
           <_generic/>
+          <_logging_behavior>
+            <_exclude>false</_exclude>
+            <_include>false</_include>
+          </_logging_behavior>
           <_timing>
             <_timing_weight/>
             <_timing_avg/>
@@ -95,15 +121,21 @@
       </call>
       <parallel wait="-1" cancel="last">
         <parallel_branch>
-          <call id="a3" endpoint="">
+          <call id="a3" endpoint="consentrequest">
             <parameters>
               <label>Ask for consent</label>
               <color/>
-              <method>:post</method>
-              <arguments/>
+              <arguments>
+                <timeout>1</timeout>
+                <data/>
+              </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -132,16 +164,27 @@
             </documentation>
           </call>
           <choose mode="exclusive" label="">
-            <alternative condition="Consent Withdrawn">
-              <call id="a19" endpoint="">
+            <alternative eid="e1" condition="not data.consent">
+              <_probability>
+                <_probability_min/>
+                <_probability_max/>
+                <_probability_avg/>
+              </_probability>
+              <call id="a19" endpoint="abortbloodcollection">
                 <parameters>
                   <label>Abord Blood Collection</label>
                   <color/>
-                  <method>:post</method>
-                  <arguments/>
+                  <arguments>
+                    <timeout/>
+                    <data/>
+                  </arguments>
                 </parameters>
                 <annotations>
                   <_generic/>
+                  <_logging_behavior>
+                    <_exclude>false</_exclude>
+                    <_include>false</_include>
+                  </_logging_behavior>
                   <_timing>
                     <_timing_weight/>
                     <_timing_avg/>
@@ -170,21 +213,15 @@
                 </documentation>
               </call>
               <terminate/>
-              <_probability>
-                <_probability_min/>
-                <_probability_max/>
-                <_probability_avg/>
-              </_probability>
             </alternative>
             <otherwise/>
           </choose>
         </parallel_branch>
         <parallel_branch>
-          <call id="a20" endpoint="timeout">
+          <call id="a20" endpoint="waituntildried">
             <parameters>
               <label>Wait for disinfectant to dry</label>
               <color/>
-              <method>:post</method>
               <arguments>
                 <timeout>30</timeout>
                 <data/>
@@ -192,6 +229,10 @@
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -221,15 +262,21 @@
           </call>
         </parallel_branch>
       </parallel>
-      <call id="a4" endpoint="">
+      <call id="a4" endpoint="attemptvenepuncture">
         <parameters>
           <label>Attempt Venepuncture</label>
           <color/>
-          <method>:post</method>
-          <arguments/>
+          <arguments>
+            <timeout>1</timeout>
+            <data/>
+          </arguments>
         </parameters>
         <annotations>
           <_generic/>
+          <_logging_behavior>
+            <_exclude>false</_exclude>
+            <_include>false</_include>
+          </_logging_behavior>
           <_timing>
             <_timing_weight/>
             <_timing_avg/>
@@ -258,16 +305,27 @@
         </documentation>
       </call>
       <choose mode="exclusive" label="">
-        <alternative condition="Venepuncture UnSuccesfull">
-          <call id="a5" endpoint="">
+        <alternative eid="e3" condition="data.venepuncture_status = &quot;failed&quot;">
+          <_probability>
+            <_probability_min/>
+            <_probability_max/>
+            <_probability_avg/>
+          </_probability>
+          <call id="a5" endpoint="consentrequest">
             <parameters>
               <label>Ask for consent</label>
               <color/>
-              <method>:post</method>
-              <arguments/>
+              <arguments>
+                <timeout/>
+                <data/>
+              </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -296,21 +354,27 @@
             </documentation>
           </call>
           <choose mode="exclusive" label="">
-            <alternative condition="Consent Withdrawn">
+            <alternative eid="e2" condition="not data.consent">
               <_probability>
                 <_probability_min/>
                 <_probability_max/>
                 <_probability_avg/>
               </_probability>
-              <call id="a6" endpoint="">
+              <call id="a6" endpoint="abortbloodcollection">
                 <parameters>
                   <label>Abort Blood Collection</label>
                   <color/>
-                  <method>:post</method>
-                  <arguments/>
+                  <arguments>
+                    <timeout>1</timeout>
+                    <data/>
+                  </arguments>
                 </parameters>
                 <annotations>
                   <_generic/>
+                  <_logging_behavior>
+                    <_exclude>false</_exclude>
+                    <_include>false</_include>
+                  </_logging_behavior>
                   <_timing>
                     <_timing_weight/>
                     <_timing_avg/>
@@ -341,15 +405,21 @@
               <terminate/>
             </alternative>
             <otherwise>
-              <call id="a7" endpoint="">
+              <call id="a7" endpoint="attemptvenepuncture">
                 <parameters>
                   <label>Attempt Venepuncture</label>
                   <color/>
-                  <method>:post</method>
-                  <arguments/>
+                  <arguments>
+                    <timeout>1</timeout>
+                    <data/>
+                  </arguments>
                 </parameters>
                 <annotations>
                   <_generic/>
+                  <_logging_behavior>
+                    <_exclude>false</_exclude>
+                    <_include>false</_include>
+                  </_logging_behavior>
                   <_timing>
                     <_timing_weight/>
                     <_timing_avg/>
@@ -378,16 +448,27 @@
                 </documentation>
               </call>
               <choose mode="exclusive" label="">
-                <alternative condition="Venepuncture UnSuccesful">
-                  <call id="a8" endpoint="">
+                <alternative eid="e4" condition="data.venepuncture_status = &quot;failed&quot;">
+                  <_probability>
+                    <_probability_min/>
+                    <_probability_max/>
+                    <_probability_avg/>
+                  </_probability>
+                  <call id="a8" endpoint="abortbloodcollection">
                     <parameters>
                       <label>Abort Blood Collection</label>
                       <color/>
-                      <method>:post</method>
-                      <arguments/>
+                      <arguments>
+                        <timeout>1</timeout>
+                        <data/>
+                      </arguments>
                     </parameters>
                     <annotations>
                       <_generic/>
+                      <_logging_behavior>
+                        <_exclude>false</_exclude>
+                        <_include>false</_include>
+                      </_logging_behavior>
                       <_timing>
                         <_timing_weight/>
                         <_timing_avg/>
@@ -416,21 +497,11 @@
                     </documentation>
                   </call>
                   <terminate/>
-                  <_probability>
-                    <_probability_min/>
-                    <_probability_max/>
-                    <_probability_avg/>
-                  </_probability>
                 </alternative>
                 <otherwise/>
               </choose>
             </otherwise>
           </choose>
-          <_probability>
-            <_probability_min/>
-            <_probability_max/>
-            <_probability_avg/>
-          </_probability>
         </alternative>
         <otherwise/>
       </choose>
@@ -444,16 +515,19 @@
             </_probability>
             <call id="a15" endpoint="timeout">
               <parameters>
-                <label/>
+                <label>Invert every 30 seconds</label>
                 <color/>
-                <method>:post</method>
                 <arguments>
-                  <timeout/>
+                  <timeout>30</timeout>
                   <data/>
                 </arguments>
               </parameters>
               <annotations>
                 <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
                 <_timing>
                   <_timing_weight/>
                   <_timing_avg/>
@@ -481,15 +555,21 @@
                 </implementation>
               </documentation>
             </call>
-            <call id="a16" endpoint="">
+            <call id="a16" endpoint="invertcontainer">
               <parameters>
                 <label>Invert Blood Container</label>
                 <color/>
-                <method>:post</method>
-                <arguments/>
+                <arguments>
+                  <timeout>1</timeout>
+                  <data/>
+                </arguments>
               </parameters>
               <annotations>
                 <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
                 <_timing>
                   <_timing_weight/>
                   <_timing_avg/>
@@ -524,14 +604,17 @@
             <parameters>
               <label>Maximal Collection Time</label>
               <color/>
-              <method>:post</method>
               <arguments>
-                <timeout/>
+                <timeout>1500</timeout>
                 <data/>
               </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -559,15 +642,21 @@
               </implementation>
             </documentation>
           </call>
-          <call id="a12" endpoint="">
+          <call id="a12" endpoint="abortbloodcollection">
             <parameters>
               <label>Abord Blood Collection</label>
               <color/>
-              <method>:post</method>
-              <arguments/>
+              <arguments>
+                <timeout>1</timeout>
+                <data/>
+              </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -601,9 +690,8 @@
           <loop mode="pre_test" condition="True">
             <call id="a10" endpoint="timeout">
               <parameters>
-                <label/>
+                <label>Mix every 5 seconds</label>
                 <color/>
-                <method>:post</method>
                 <arguments>
                   <timeout>5</timeout>
                   <data/>
@@ -611,6 +699,10 @@
               </parameters>
               <annotations>
                 <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
                 <_timing>
                   <_timing_weight/>
                   <_timing_avg/>
@@ -643,15 +735,21 @@
               <_probability_max/>
               <_probability_avg/>
             </_probability>
-            <call id="a9" endpoint="">
+            <call id="a9" endpoint="mixwithanticoagulant">
               <parameters>
                 <label>Mix with anticoagulant</label>
                 <color/>
-                <method>:post</method>
-                <arguments/>
+                <arguments>
+                  <timeout>1</timeout>
+                  <data/>
+                </arguments>
               </parameters>
               <annotations>
                 <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
                 <_timing>
                   <_timing_weight/>
                   <_timing_avg/>
@@ -682,15 +780,21 @@
           </loop>
         </parallel_branch>
         <parallel_branch>
-          <call id="a13" endpoint="">
+          <call id="a13" endpoint="collectblood">
             <parameters>
               <label>Collect Blood</label>
               <color/>
-              <method>:post</method>
-              <arguments/>
+              <arguments>
+                <timeout>1</timeout>
+                <data/>
+              </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -722,15 +826,21 @@
       </parallel>
       <parallel wait="0" cancel="last">
         <parallel_branch>
-          <call id="a14" endpoint="">
+          <call id="a14" endpoint="monitorbleeding">
             <parameters>
               <label>Monitor Bleeding</label>
               <color/>
-              <method>:post</method>
-              <arguments/>
+              <arguments>
+                <timeout>1</timeout>
+                <data/>
+              </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -764,14 +874,17 @@
             <parameters>
               <label>Bleeding Exceed 15 Minutes</label>
               <color/>
-              <method>:post</method>
               <arguments>
-                <timeout/>
+                <timeout>1500</timeout>
                 <data/>
               </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -799,15 +912,21 @@
               </implementation>
             </documentation>
           </call>
-          <call id="a18" endpoint="">
+          <call id="a18" endpoint="informphysician">
             <parameters>
               <label>Inform Physician</label>
               <color/>
-              <method>:post</method>
-              <arguments/>
+              <arguments>
+                <timeout>1</timeout>
+                <data/>
+              </arguments>
             </parameters>
             <annotations>
               <_generic/>
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
               <_timing>
                 <_timing_weight/>
                 <_timing_avg/>
@@ -837,6 +956,7 @@
           </call>
         </parallel_branch>
       </parallel>
+      <stop id="a21"/>
     </description>
   </description>
   <transformation>

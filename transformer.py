@@ -87,7 +87,6 @@ async def transform(request: Request):
             hash_key = f"{caller_id}{instance_id}"
             hash_t.insert(hash_key, job_list)
             logger.info(f'Stored jobs for hash key {hash_key}: {job_list}')
-
         hash_t.save_disk("Constraints.json")
     return
 
@@ -96,7 +95,8 @@ async def vote(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
         instance_id = str(notification["instance"])
-        caller_id = notification["content"]["attributes"]["caller_id"]
+        print(notification)
+        caller_id = "temp"
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)
         if jobs == "No record found":
