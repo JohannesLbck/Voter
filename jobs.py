@@ -8,13 +8,13 @@ class Jobs:
 
     # --- vote_syncing_before jobs ---
 
-    def wait_for_event_callback(self, job):
+    def wait_for_event_callback(self, job, callback):
         """Wait for callback of a wait for event pattern."""
         logger.info(f'Wait for event callback: {job}')
         # TODO: implement wait for event callback logic
         pass
 
-    def open_max_exec_time(self, job):
+    def open_max_exec_time(self, job, callback):
         """Open instance of a max exec time pattern."""
         logger.info(f'Open max exec time instance: {job}')
         tree = MaxExecTime(job["Time"], job["B_Endpoint"])
@@ -22,7 +22,7 @@ class Jobs:
         # TODO: add the checking job to the hashmap
         pass
 
-    def open_recurring(self, job):
+    def open_recurring(self, job, callback):
         """Open instance of a recurring pattern."""
         logger.info(f'Open recurring instance: {job}')
         tree = Recurring(job["B_Endpoint"], job["B_Endpoint"], job["Time"])
@@ -32,19 +32,19 @@ class Jobs:
 
     # --- vote_syncing_after jobs ---
 
-    def abandon_max_exec_time(self, job):
+    def abandon_max_exec_time(self, job, callback):
         """Abandon instance of a max exec time pattern."""
         logger.info(f'Abandon max exec time instance: {job}')
         # TODO: implement abandon max exec time instance
         pass
 
-    def abandon_recurring(self, job):
+    def abandon_recurring(self, job, callback):
         """Abandon instance of a recurring pattern."""
         logger.info(f'Abandon recurring instance: {job}')
         # TODO: implement abandon recurring instance
         pass
 
-    def open_wait_for_event(self, job):
+    def open_wait_for_event(self, job, callback):
         """Open instance of a wait for event pattern."""
         logger.info(f'Open wait for event instance: {job}')
         tree = WaitForEvent(job["B_Endpoint"])
@@ -66,7 +66,7 @@ class Jobs:
         "wait_for_event": "open_wait_for_event",
     }
 
-    def handle_jobs(self, jobs, phase):
+    def handle_jobs(self, jobs, phase, callback):
         """Dispatch a list of jobs to the appropriate handler based on phase ('before' or 'after')."""
         dispatch = self.BEFORE_DISPATCH if phase == "before" else self.AFTER_DISPATCH
         for job in jobs:
@@ -75,4 +75,4 @@ class Jobs:
             if method_name is None:
                 logger.warning(f'No handler for pattern "{pattern}" in phase "{phase}"')
                 continue
-            getattr(self, method_name)(job)
+            getattr(self, method_name)(job, callback)

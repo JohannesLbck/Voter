@@ -21,6 +21,7 @@ import signal
 import json
 import logging
 import argparse
+import requests
 import multiprocessing as mp
 from hashmap import hash_t 
 from patterns import MaxExecTime, Recurring, WaitForEvent
@@ -102,11 +103,14 @@ async def vote_syncing_before(request: Request):
         caller_id = "temp"
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)
+        callback = form["callback"]
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
+            requests.put(callback, headers={"CPEE-CALLBACK": "true"})
             return Response(headers={"CPEE-CALLBACK": "true"})
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
-        jobs_handler.handle_jobs(jobs, phase="before")
+        jobs_handler.handle_jobs(jobs, phase="before", callback=callback)
+        requests.put(callback, headers={"CPEE-CALLBACK": "true"})
         return Response(headers={"CPEE-CALLBACK": "true"})
 
 @app.post("/vote_syncing_after")
@@ -114,15 +118,18 @@ async def vote_syncing_after(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
         instance_id = str(notification["instance"])
-        print(notification)
+        print(form)
         caller_id = notification["content"]["activity"] 
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)
+        callback = form["callback"]
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
+            requests.put(callback, headers={"CPEE-CALLBACK": "true"})
             return Response(headers={"CPEE-CALLBACK": "true"})
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
-        jobs_handler.handle_jobs(jobs, phase="after")
+        jobs_handler.handle_jobs(jobs, phase="after", callback=callback)
+        requests.put(callback, headers={"CPEE-CALLBACK": "true"})
         return Response(headers={"CPEE-CALLBACK": "true"})
 
 def _configure_logging(verbose=False):
