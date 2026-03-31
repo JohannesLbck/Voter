@@ -21,7 +21,7 @@ class Jobs:
         """Open instance of a max exec time pattern."""
         logger.info(f'Open max exec time instance: {job}')
         tree = MaxExecTime(job["Time"], job["B_Endpoint"])
-        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running", "xml": tree})
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running"}, files={"xml": ("xml", tree, "text/xml")})
         print(f'open_max_exec_time response: {response.status_code} {response.text}')
         # TODO: add the checking job to the hashmap
         pass
@@ -30,7 +30,7 @@ class Jobs:
         """Open instance of a recurring pattern."""
         logger.info(f'Open recurring instance: {job}')
         tree = Recurring(job["B_Endpoint"], job["B_Endpoint"], job["Time"])
-        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running", "xml": tree})
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running"}, files={"xml": ("xml", tree, "text/xml")})
         print(f'open_recurring response: {response.status_code} {response.text}')
         # TODO: add the checking job to the hashmap
         pass
@@ -53,7 +53,7 @@ class Jobs:
         """Open instance of a wait for event pattern."""
         logger.info(f'Open wait for event instance: {job}')
         tree = WaitForEvent(job["B_Endpoint"])
-        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running", "xml": tree})
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running"}, files={"xml": ("xml", tree, "text/xml")})
         print(f'open_wait_for_event response: {response.status_code} {response.text}')
         # TODO: add the checking job to the hashmap
         pass
