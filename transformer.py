@@ -57,6 +57,7 @@ mapping = {
 async def transform(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
+        instance_id = str(notification["instance"])
         endpoints = notification["content"]["endpoints"]
         logger.debug(f'endpoints: {endpoints}')
         try:
@@ -82,10 +83,30 @@ async def transform(request: Request):
                     jobs[caller_id] = []
                 jobs[caller_id].append(job)
                 logger.info(f'Generated job: {job}')
-        for key,value in jobs.items():
-            pass
+        for caller_id, job_list in jobs.items():
+            hash_key = f"{caller_id}{instance_id}"
+            hash_t.insert(hash_key, job_list)
+            logger.info(f'Stored jobs for hash key {hash_key}: {job_list}')
+
+        hash_t.save_disk("Constraints.json")
     return
 
+@app.post("/vote")
+async def vote(request: Request):
+    async with request.form() as form:
+        notification = json.loads(form["notification"])
+        instance_id = str(notification["instance"])
+        caller_id = notification["content"]["attributes"]["caller_id"]
+        hash_key = f"{caller_id}{instance_id}"
+        jobs = hash_t.get(hash_key)
+        if jobs == "No record found":
+            logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
+            return
+        logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
+        for job in jobs:
+            ## create the custom tree here which will be instanciated
+            ## Use a mapping between patterns here so the job can be correctly parsed
+            print(job)
 
 def _configure_logging(verbose=False):
     level = logging.DEBUG if verbose else logging.INFO
