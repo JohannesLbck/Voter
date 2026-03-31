@@ -118,7 +118,7 @@ async def vote_syncing_after(request: Request):
         jobs = hash_t.get(hash_key)
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            return
+            return 
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="after")
 

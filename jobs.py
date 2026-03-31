@@ -1,4 +1,5 @@
 import logging
+from patterns import MaxExecTime, Recurring, WaitForEvent
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +17,17 @@ class Jobs:
     def open_max_exec_time(self, job):
         """Open instance of a max exec time pattern."""
         logger.info(f'Open max exec time instance: {job}')
-        # TODO: implement open max exec time instance
+        tree = MaxExecTime(job["Time"], job["B_Endpoint"])
+        # TODO: use tree to open instance
+        # TODO: add the checking job to the hashmap
         pass
 
     def open_recurring(self, job):
         """Open instance of a recurring pattern."""
         logger.info(f'Open recurring instance: {job}')
-        # TODO: implement open recurring instance
+        tree = Recurring(job["B_Endpoint"], job["B_Endpoint"], job["Time"])
+        # TODO: use tree to open instance
+        # TODO: add the checking job to the hashmap
         pass
 
     # --- vote_syncing_after jobs ---
@@ -42,7 +47,9 @@ class Jobs:
     def open_wait_for_event(self, job):
         """Open instance of a wait for event pattern."""
         logger.info(f'Open wait for event instance: {job}')
-        # TODO: implement open wait for event instance
+        tree = WaitForEvent(job["B_Endpoint"])
+        # TODO: use tree to open instance
+        # TODO: add the checking job to the hashmap
         pass
 
     # --- dispatch ---
