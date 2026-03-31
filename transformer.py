@@ -33,6 +33,7 @@ from pydantic import BaseModel
 from multiprocessing import Process
 from reqparser import parse_requirements
 from ComplianceAST import traverse
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
@@ -106,12 +107,11 @@ async def vote_syncing_before(request: Request):
         callback = form["callback"]
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            requests.put(callback, headers={"CPEE-CALLBACK": "true"})
-            return Response(headers={"CPEE-CALLBACK": "true"})
+            return  JSONResponse(content="true")
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="before", callback=callback)
-        requests.put(callback, headers={"CPEE-CALLBACK": "true"})
-        return {"true"}
+
+        return  JSONResponse(content="true")
 
 @app.post("/vote_syncing_after")
 async def vote_syncing_after(request: Request):
@@ -125,12 +125,10 @@ async def vote_syncing_after(request: Request):
         callback = form["callback"]
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            requests.put(callback, headers={"CPEE-CALLBACK": "true"})
-            return Response(headers={"CPEE-CALLBACK": "true"})
+            return  JSONResponse(content="true")
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="after", callback=callback)
-        requests.put(callback, headers={"CPEE-CALLBACK": "true"})
-        return Response(headers={"CPEE-CALLBACK": "true"})
+        return  JSONResponse(content="true")
 
 def _configure_logging(verbose=False):
     level = logging.DEBUG if verbose else logging.INFO
