@@ -4,7 +4,7 @@ from patterns import MaxExecTime, Recurring, WaitForEvent
 
 logger = logging.getLogger(__name__)
 
-SUBPROCESS_URL = "https://cpee.org/flow/start/url/"
+SUBPROCESS_URL = "https://cpee.org/flow/start/xml/"
 
 
 class Jobs:
