@@ -107,11 +107,11 @@ async def vote_syncing_before(request: Request):
         callback = form["callback"]
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            return  JSONResponse(content="true")
+            return  Response(content="true", media_type="text/plain")
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="before", callback=callback)
 
-        return  JSONResponse(content="true")
+        return  Response(content="true", media_type="text/plain")
 
 @app.post("/vote_syncing_after")
 async def vote_syncing_after(request: Request):
@@ -125,10 +125,10 @@ async def vote_syncing_after(request: Request):
         callback = form["callback"]
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
-            return  JSONResponse(content="true")
+            return  Response(content="true", media_type="text/plain")
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
         jobs_handler.handle_jobs(jobs, phase="after", callback=callback)
-        return  JSONResponse(content="true")
+        return  Response(content="true", media_type="text/plain")
 
 def _configure_logging(verbose=False):
     level = logging.DEBUG if verbose else logging.INFO
