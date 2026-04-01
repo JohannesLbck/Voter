@@ -109,8 +109,11 @@ async def vote_syncing_before(request: Request):
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
             return  Response(content="true", media_type="text/plain")
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
-        jobs_handler.handle_jobs(jobs, phase="before", callback=callback)
-
+        return_jobs = jobs_handler.handle_jobs(jobs, phase="before", callback=callback)
+        for caller_id, job_list in return_jobs.items():
+            hash_key = f"{caller_id}{instance_id}"
+            hash_t.insert(hash_key, job_list)
+            logger.info(f'Stored jobs for hash key {hash_key}: {job_list}')
         return  Response(content="true", media_type="text/plain")
 
 @app.post("/vote_syncing_after")
@@ -127,7 +130,11 @@ async def vote_syncing_after(request: Request):
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
             return  Response(content="true", media_type="text/plain")
         logger.info(f'Found jobs for hash key {hash_key}: {jobs}')
-        jobs_handler.handle_jobs(jobs, phase="after", callback=callback)
+        return_jobs = jobs_handler.handle_jobs(jobs, phase="after", callback=callback)
+        for caller_id, job_list in return_jobs.items():
+            hash_key = f"{caller_id}{instance_id}"
+            hash_t.insert(hash_key, job_list)
+            logger.info(f'Stored jobs for hash key {hash_key}: {job_list}')
         return  Response(content="true", media_type="text/plain")
 
 def _configure_logging(verbose=False):

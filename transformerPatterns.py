@@ -40,6 +40,7 @@ def recurring(tree, a, b, t):
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
         b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
         return {"CallerID" : a_ele.get("id"),
+                    "Phase": "before",
                     "Pattern" : "recurring",
                     "Time" : t,
                     "B_Endpoint" : b_endpoint_key}
@@ -56,6 +57,7 @@ def maxExecTime(tree, a, b, time):
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
         b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
         return {"CallerID" : a_id,
+                    "Phase": "before",
                     "Pattern" : "maxExecTime",
                     "Time" : time,
                     "B_Endpoint" : b_endpoint_key}
@@ -73,6 +75,7 @@ def max_time_between(tree, a, b, time, c = None):
             c_endpoint_key = c_path.get("endpoint") if c_path is not None else c
             c_endpoint_key = c_endpoint_key if c_endpoint_key is not "" else c
             return {"CallerID" : apath.get("id"),
+                    "Phase": "before",
                     "Pattern" : "max_time_between",
                     "Time" : time,
                     "C_Endpoint" : c_endpoint_key}
@@ -94,8 +97,6 @@ def min_time_between(tree, a, b, time, c = None):
     else:
         logger.info(f'Activities "{a}" and "{b}" are not in a leads_to relationship, so the min_time_between requirement is False')
         return False 
-    
-    
     
     
 
