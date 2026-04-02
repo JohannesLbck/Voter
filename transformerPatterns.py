@@ -15,16 +15,12 @@
 
 import logging
 import re
-#from hashmap import constraints_t # Future Work :) 
 import xml.etree.ElementTree as ET
 from util import * 
+from modifierpatterns import recurring_modify, max_time_between_modify, wait_for_event_modify
+
 ## Check util which is an interface to all other methods if you want all method names
 
-## Load the Hashmap for run time voting
-
-
-## This contains the verification using explicit, annotated verification, meaning the activities are identified by labels and resources
-## are explicity annotated
 
 namespace = {"ns0": "http://cpee.org/ns/description/1.0"}
 data_decision_tags= [ ".//ns0:loop", ".//ns0:alternative"]
@@ -39,7 +35,8 @@ def recurring(tree, a, b, t):
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
         b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
-        return {"CallerID" : a_ele.get("id"),
+        modified_tree = recurring_modify(tree, a_ele, b_ele, t) # Creates the modified tree here
+        return modified_tree, {"CallerID" : a_ele.get("id"),
                     "Phase": "before",
                     "Pattern" : "recurring",
                     "Time" : t,
@@ -56,7 +53,8 @@ def maxExecTime(tree, a, b, time):
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
         b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
-        return {"CallerID" : a_id,
+        modified_tree = max_exec_time_modify(tree, a_ele, b_ele, time) # Creates the modified tree here
+        return modified_tree, {"CallerID" : a_id,
                     "Phase": "before",
                     "Pattern" : "maxExecTime",
                     "Time" : time,
@@ -74,7 +72,8 @@ def max_time_between(tree, a, b, time, c = None):
             c_path = exists_by_label(tree, c)
             c_endpoint_key = c_path.get("endpoint") if c_path is not None else c
             c_endpoint_key = c_endpoint_key if c_endpoint_key is not "" else c
-            return {"CallerID" : apath.get("id"),
+            modified_tree = max_time_between_modify(tree, apath, bpath, c_path, time) # Creates the modified tree here
+            return modified_tree, {"CallerID" : apath.get("id"),
                     "Phase": "before",
                     "Pattern" : "max_time_between",
                     "Time" : time,
@@ -88,29 +87,29 @@ def max_time_between(tree, a, b, time, c = None):
 
 ## Min Time between two activities, enforced via Voting
 def min_time_between(tree, a, b, time, c = None):
-    a_sync = False
+    a_sync = None
     if leads_to(tree, a, b):
         apath = exists_by_label(tree, a)
         bpath = exists_by_label(tree, b)
         ## Original Method had errors, but this pattern never appears in practice, so fix this later
-        return True
+        return None
     else:
         logger.info(f'Activities "{a}" and "{b}" are not in a leads_to relationship, so the min_time_between requirement is False')
-        return False 
+        return None
     
     
 
 ## By Due Date: Decide how to handle due dates later
 ## This simply reads the annotation whether the due date is set correctly in the annotation, it does not check actual implementation, could be extended with voting later then it would even work during execution
 def by_due_date_annotated(tree, a, timestamp):
-    return None
+    return tree, None
 ## By Due Date: checks if the due date requirement is explicitly defined through sync check 
 def by_due_date_explicit(tree, a, timestamp):
-    return None
+    return tree, None
 
 ## checks both annotated and explicit, returns true if either
 def by_due_date(tree, a, timestamp, c = None):
-    return None
+    return tree, None
 
 
 
@@ -118,51 +117,51 @@ def by_due_date(tree, a, timestamp, c = None):
 
 
 def executed_by(args):
-    return None
+    return tree, None
 
 # These are just left empty to keep compatability with the full ASTs
 def exists(tree, a):#
-    return None
+    return tree, None
 def absence(tree, a):
-    return None
+    return tree, None
 def loop(tree, a):
-    return None
+    return tree, None
 def directly_follows(tree, a, b):
-    return None
+    return tree, None
 def exclusive(tree, a, b):
-    return None
+    return tree, None
 def leads_to(tree, a, b):
-    return None
+    return tree, None
 def precedence(tree, a, b):
-    return None
+    return tree, None
 def leads_to_absence(tree, a, b):
-    return None
+    return tree, None
 def parallel(tree, a, b):
-    return None
+    return tree, None
 # Resource
 def executed_by_identify(tree, resource):
-    return None
+    return tree, None
 def executed_by_return(tree, a):
-    return None
+    return tree, None
 ## Data
 def send_exist(tree, data, complete = False):
-    return None
+    return tree, None
 def receive_exist(tree, data, complete = False):
-    return None
+    return tree, None
 def activity_sends(tree, a, data):
-    return None
+    return tree, None
 def activity_receives(tree, a, data):
-    return None   
+    return tree, None
 def condition(tree, condition):
-    return None
+    return tree, None
 def condition_directly_follows(tree, condition , a):
-    return None
+    return tree, None
 def failure_eventually_follows(tree, a, b):
-    return None
+    return tree, None
 
 def failure_directly_follows(tree, a, b):
-    return None
+    return tree, None
 def condition_eventually_follows(tree, condition, a, scope = "branch"):
-    return None
+    return tree, None
 def data_leads_to_absence(tree, condition, a):
-    return None
+    return tree, None

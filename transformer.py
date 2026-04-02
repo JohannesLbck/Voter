@@ -80,7 +80,7 @@ async def transform(request: Request):
         jobs = {}
         for counter, req in enumerate(requirements):
             logger.info(f'Verifying Pattern {req}')
-            job = traverse(req, tree=xml)
+            modified_tree, job = traverse(req, tree=xml)
             if job is not None:
                 job = replace_endpoints(job, endpoints)
                 caller_id = job["CallerID"]
@@ -88,6 +88,7 @@ async def transform(request: Request):
                     jobs[caller_id] = []
                 jobs[caller_id].append(job)
                 logger.info(f'Generated job: {job}')
+            xml = modified_tree
         for caller_id, job_list in jobs.items():
             hash_key = f"{caller_id}{instance_id}"
             hash_t.insert(hash_key, job_list)
