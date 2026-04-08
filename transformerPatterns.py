@@ -17,7 +17,7 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from util import * 
-from modifierpatterns import recurring_modify, max_time_between_modify, wait_for_event_modify
+from modifierpatterns import recurring_modify, max_time_between_modify, wait_for_event_modify, max_exec_time_modify
 
 ## Check util which is an interface to all other methods if you want all method names
 
