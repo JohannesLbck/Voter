@@ -89,7 +89,8 @@ async def transform(request: Request):
                 jobs[caller_id].append(job)
                 logger.info(f'Generated job: {job}')
             xml = modified_tree
-            print(ET.tostring(xml))
+            with open(f'modified_tree_{instance_id}_{counter}.xml', 'wb') as f:
+                f.write(ET.tostring(modified_tree))
         for caller_id, job_list in jobs.items():
             hash_key = f"{caller_id}{instance_id}"
             hash_t.insert(hash_key, job_list)
