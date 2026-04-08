@@ -35,6 +35,7 @@ def recurring(tree, a, b, t):
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
         b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
+        loops = tree.findall(".//ns0:loop", namespace)
         modified_tree = recurring_modify(tree, a_ele, b_ele, t) # Creates the modified tree here
         return modified_tree, {"CallerID" : a_ele.get("id"),
                     "Phase": "before",
