@@ -5,6 +5,26 @@ from util import *
 
 logger = logging.getLogger(__name__)
 
+
+## Currently the following 3 methods all do the exact same thing, keep them as 3 for now, in case I find a reason to separate them later
+## Also makes testing easier
+
+def max_exec_time_modify(tree, a_ele, b_ele, time):
+    '''
+    This function modifies the tree such that, if the max execution time constraint is explicitly enforced, then the parallel
+    branch that contains the timeout enforcing the max execution time constraint is removed.
+    '''
+    for timeout in timeouts_exists(tree):
+        if cancel_last(tree, timeout[0], b_ele) is not None:
+            if not timeout[1].isdigit():
+                logger.warning(f"Time value {timeout[1]} is not a digit, Assume this is the correct timeout")
+                return remove_timeout(tree, timeout)
+            elif int(timeout[1]) == time:
+                logger.info(f"Removing timeout with id {timeout[0]} since it matches the time constraint")
+                return remove_timeout(tree, timeout)
+    logger.warning("No matching timeout found for the maxExecTime constraint, returning original tree")
+    return tree
+
 def max_time_between_modify(tree, a_ele, b_ele, c_ele, time):
     '''
     This function modifies the tree such that, if the max time between constraint is explicitly enforced,
