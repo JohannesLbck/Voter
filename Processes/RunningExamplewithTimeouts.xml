@@ -21,17 +21,17 @@
   </endpoints>
   <attributes>
     <guarded>none</guarded>
+    <info>RunningExamplewithTimeouts</info>
     <modeltype>CPEE</modeltype>
     <theme>packed</theme>
     <guarded_id/>
-    <info>RunningExampleClean</info>
     <creator>Christine Ashcreek</creator>
     <author>Christine Ashcreek</author>
     <model_uuid>a4252955-ad0e-433c-9cdf-3677fa2e7239</model_uuid>
     <model_version/>
     <design_stage>development</design_stage>
     <design_dir>Staff.dir/Loebbi.dir/Voting.dir</design_dir>
-    <requirements>{     "R1"=&gt;"precedence('Collect Blood', 'Identify Patient')",     "R2"=&gt;"recurring('Collect Blood','Mix with anticoagulant', 10)",     "R3"=&gt;"maxExecTime('Collect Blood','Abort Blood Collection', 300)",     "R4"=&gt;"recurring('Collect Blood', 'Invert Blood Container', 30)" }</requirements>
+    <requirements>{     "R1"=&gt;"precedence('Collect Blood', 'Identify Patient')",     "R2"=&gt;"recurring('Collect Blood','Mix with anticoagulant', 10)",     "R3"=&gt;"maxExecTime('Collect Blood','Abord Blood Collection', 300)",     "R4"=&gt;"recurring('Collect Blood', 'Invert Blood Container', 30)" }</requirements>
   </attributes>
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
@@ -40,7 +40,7 @@
           <label>Identify Venepunture Site</label>
           <color/>
           <arguments>
-            <timeout>1</timeout>
+            <timeout>5</timeout>
             <data/>
           </arguments>
         </parameters>
@@ -76,6 +76,12 @@
             <description/>
           </implementation>
         </documentation>
+        <code>
+          <prepare/>
+          <finalize output="result"/>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
       </call>
       <call id="a2" endpoint="disinfectvenepuncturesite">
         <parameters>
@@ -118,6 +124,12 @@
             <description/>
           </implementation>
         </documentation>
+        <code>
+          <prepare/>
+          <finalize output="result"/>
+          <update output="result"/>
+          <rescue output="result"/>
+        </code>
       </call>
       <parallel wait="-1" cancel="last">
         <parallel_branch>
@@ -172,7 +184,7 @@
               </_probability>
               <call id="a19" endpoint="abortbloodcollection">
                 <parameters>
-                  <label>Abord Blood Collection</label>
+                  <label>Abort Blood Collection</label>
                   <color/>
                   <arguments>
                     <timeout/>
@@ -605,7 +617,7 @@
               <label>Maximal Collection Time</label>
               <color/>
               <arguments>
-                <timeout>1500</timeout>
+                <timeout>300</timeout>
                 <data/>
               </arguments>
             </parameters>
@@ -690,10 +702,10 @@
           <loop mode="pre_test" condition="True">
             <call id="a10" endpoint="timeout">
               <parameters>
-                <label>Mix every 5 seconds</label>
+                <label>Mix every 10 seconds</label>
                 <color/>
                 <arguments>
-                  <timeout>5</timeout>
+                  <timeout>10</timeout>
                   <data/>
                 </arguments>
               </parameters>
@@ -875,7 +887,7 @@
               <label>Bleeding Exceed 15 Minutes</label>
               <color/>
               <arguments>
-                <timeout>1500</timeout>
+                <timeout>300</timeout>
                 <data/>
               </arguments>
             </parameters>

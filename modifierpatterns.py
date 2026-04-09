@@ -44,6 +44,7 @@ def max_exec_time_modify(tree, a_ele, b_ele, time):
         if timeout_call is None:
             continue
         if _in_separate_branches(tree, timeout_call, a_ele) is not None:
+            print(f'Found timeout call with id {timeout_call.get("id", "unknown")} in separate branch from a_ele with id {a_ele.get("id", "unknown")}')
             if not timeout[1].isdigit():
                 logger.warning(f"Time value {timeout[1]} is not a digit, Assume this is the correct timeout")
                 return remove_timeout(tree, timeout)

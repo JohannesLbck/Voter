@@ -163,7 +163,7 @@ async def transform(request: Request):
             xml_bytes = _fix_description_ns(xml_bytes)
             with open(f'Outputs/modified_tree_{instance_id}_{counter}.xml', 'wb') as f:
                 f.write(xml_bytes)
-        # Send final modified description as YAML event to compliance log
+        # Send final modified description as YAML event
         final_tree = remove_start_end(copy.deepcopy(xml))
         ET.indent(final_tree)
         final_xml_bytes = ET.tostring(final_tree, encoding='UTF-8', xml_declaration=True)
