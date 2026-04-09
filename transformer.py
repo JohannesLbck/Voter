@@ -57,6 +57,15 @@ LOG_HEADERS = {
     "Content-ID": "events"
 }
 
+class _LiteralStr(str):
+    """String subclass that YAML will render as a literal block scalar (|)."""
+    pass
+
+def _literal_representer(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+yaml.add_representer(_LiteralStr, _literal_representer)
+
 def _send_description_event(instance_id, instance_uuid, description_xml):
     """Send the modified description XML as a YAML event to the compliance log."""
     change_uuid = hashlib.md5(description_xml.encode('utf-8')).hexdigest()
@@ -68,7 +77,7 @@ def _send_description_event(instance_id, instance_uuid, description_xml):
             'cpee:instance': instance_uuid,
             'lifecycle:transition': 'unknown',
             'cpee:lifecycle:transition': 'description/change',
-            'cpee:description': description_xml,
+            'cpee:description': _LiteralStr(description_xml),
             'cpee:change_uuid': change_uuid,
             'time:timestamp': timestamp,
         }
