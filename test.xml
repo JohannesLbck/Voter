@@ -1,0 +1,971 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements/>
+  <endpoints>
+    <timeout>https://cpee.org/services/timeout.php</timeout>
+    <subprocess>https://cpee.org/flow/start/url/</subprocess>
+  </endpoints>
+  <attributes>
+    <guarded>none</guarded>
+    <modeltype>CPEE</modeltype>
+    <theme>extended</theme>
+    <guarded_id/>
+    <info>Running Example</info>
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <model_uuid>bfba4641-d676-4cf1-9d12-95d6181231d6</model_uuid>
+    <model_version/>
+    <design_stage>development</design_stage>
+    <requirements>{"R1"=&gt;"precedence('obtain consent', 'provide information') and data_value_alternative_directly_follows('not data.consented', 'terminate') ", "R2"=&gt;"executed_by('conduct interview and questionnaire', 'physician') or executed_by('conduct interview and questionnaire', 'trained assistant')", "R3"=&gt;"parallel('retract consent', 'direct questions') and directly_follows('retract consent', 'terminate') ", "R4"=&gt;"timed_alternative('monitor patient', 'assess donor', 900) and executed_by('assess donor', 'physician')", "R5"=&gt;"data_value_alternative_eventually_follows('assessment_status == \"rejected\" ', 'inform of rejection') and directly_follows('inform of rejection', 'terminate') ", "R7"=&gt;"activity_receives('conduct interview and questionnaire', 'assessment_status') and activity_receives('direct questions', 'assessment_status')"}</requirements>
+    <design_dir>Staff.dir/Loebbi.dir/Compliance.dir</design_dir>
+  </attributes>
+<ns0:description xmlns:ns0="http://cpee.org/ns/description/1.0">
+  <ns0:call id="a1" endpoint="identifyvenepuncturesite">
+    <ns0:parameters>
+      <ns0:label>Identify Venepunture Site</ns0:label>
+      <ns0:color />
+      <ns0:arguments>
+        <ns0:timeout>5</ns0:timeout>
+        <ns0:data />
+      </ns0:arguments>
+    </ns0:parameters>
+    <ns0:annotations>
+      <ns0:_generic />
+      <ns0:_logging_behavior>
+        <ns0:_exclude>false</ns0:_exclude>
+        <ns0:_include>false</ns0:_include>
+      </ns0:_logging_behavior>
+      <ns0:_timing>
+        <ns0:_timing_weight />
+        <ns0:_timing_avg />
+        <ns0:explanations />
+      </ns0:_timing>
+      <ns0:_shifting>
+        <ns0:_shifting_type>Duration</ns0:_shifting_type>
+      </ns0:_shifting>
+      <ns0:_context_data_analysis>
+        <ns0:probes />
+        <ns0:ips />
+      </ns0:_context_data_analysis>
+      <ns0:report>
+        <ns0:url />
+      </ns0:report>
+      <ns0:_notes>
+        <ns0:_notes_general />
+      </ns0:_notes>
+    </ns0:annotations>
+    <ns0:documentation>
+      <ns0:input />
+      <ns0:output />
+      <ns0:implementation>
+        <ns0:description />
+      </ns0:implementation>
+    </ns0:documentation>
+    <ns0:code>
+      <ns0:prepare />
+      <ns0:finalize output="result" />
+      <ns0:update output="result" />
+      <ns0:rescue output="result" />
+    </ns0:code>
+  </ns0:call>
+  <ns0:call id="a2" endpoint="disinfectvenepuncturesite">
+    <ns0:parameters>
+      <ns0:label>Disinfect Venepunture Site</ns0:label>
+      <ns0:color />
+      <ns0:arguments>
+        <ns0:timeout>1</ns0:timeout>
+        <ns0:data />
+      </ns0:arguments>
+    </ns0:parameters>
+    <ns0:annotations>
+      <ns0:_generic />
+      <ns0:_logging_behavior>
+        <ns0:_exclude>false</ns0:_exclude>
+        <ns0:_include>false</ns0:_include>
+      </ns0:_logging_behavior>
+      <ns0:_timing>
+        <ns0:_timing_weight />
+        <ns0:_timing_avg />
+        <ns0:explanations />
+      </ns0:_timing>
+      <ns0:_shifting>
+        <ns0:_shifting_type>Duration</ns0:_shifting_type>
+      </ns0:_shifting>
+      <ns0:_context_data_analysis>
+        <ns0:probes />
+        <ns0:ips />
+      </ns0:_context_data_analysis>
+      <ns0:report>
+        <ns0:url />
+      </ns0:report>
+      <ns0:_notes>
+        <ns0:_notes_general />
+      </ns0:_notes>
+    </ns0:annotations>
+    <ns0:documentation>
+      <ns0:input />
+      <ns0:output />
+      <ns0:implementation>
+        <ns0:description />
+      </ns0:implementation>
+    </ns0:documentation>
+    <ns0:code>
+      <ns0:prepare />
+      <ns0:finalize output="result" />
+      <ns0:update output="result" />
+      <ns0:rescue output="result" />
+    </ns0:code>
+  </ns0:call>
+  
+  <ns0:parallel wait="-1" cancel="last">
+    <ns0:parallel_branch>
+      <ns0:call id="a3" endpoint="consentrequest">
+        <ns0:parameters>
+          <ns0:label>Ask for consent</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+      <ns0:choose mode="exclusive" label="">
+        <ns0:alternative eid="e1" condition="not data.consent">
+          <ns0:_probability>
+            <ns0:_probability_min />
+            <ns0:_probability_max />
+            <ns0:_probability_avg />
+          </ns0:_probability>
+          <ns0:call id="a19" endpoint="abortbloodcollection">
+            <ns0:parameters>
+              <ns0:label>Abord Blood Collection</ns0:label>
+              <ns0:color />
+              <ns0:arguments>
+                <ns0:timeout />
+                <ns0:data />
+              </ns0:arguments>
+            </ns0:parameters>
+            <ns0:annotations>
+              <ns0:_generic />
+              <ns0:_logging_behavior>
+                <ns0:_exclude>false</ns0:_exclude>
+                <ns0:_include>false</ns0:_include>
+              </ns0:_logging_behavior>
+              <ns0:_timing>
+                <ns0:_timing_weight />
+                <ns0:_timing_avg />
+                <ns0:explanations />
+              </ns0:_timing>
+              <ns0:_shifting>
+                <ns0:_shifting_type>Duration</ns0:_shifting_type>
+              </ns0:_shifting>
+              <ns0:_context_data_analysis>
+                <ns0:probes />
+                <ns0:ips />
+              </ns0:_context_data_analysis>
+              <ns0:report>
+                <ns0:url />
+              </ns0:report>
+              <ns0:_notes>
+                <ns0:_notes_general />
+              </ns0:_notes>
+            </ns0:annotations>
+            <ns0:documentation>
+              <ns0:input />
+              <ns0:output />
+              <ns0:implementation>
+                <ns0:description />
+              </ns0:implementation>
+            </ns0:documentation>
+          </ns0:call>
+          <ns0:terminate />
+        </ns0:alternative>
+        <ns0:otherwise />
+      </ns0:choose>
+    </ns0:parallel_branch>
+    <ns0:parallel_branch>
+      <ns0:call id="a20" endpoint="waituntildried">
+        <ns0:parameters>
+          <ns0:label>Wait for disinfectant to dry</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>30</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+    </ns0:parallel_branch>
+  </ns0:parallel>
+  <ns0:call id="a4" endpoint="attemptvenepuncture">
+    <ns0:parameters>
+      <ns0:label>Attempt Venepuncture</ns0:label>
+      <ns0:color />
+      <ns0:arguments>
+        <ns0:timeout>1</ns0:timeout>
+        <ns0:data />
+      </ns0:arguments>
+    </ns0:parameters>
+    <ns0:annotations>
+      <ns0:_generic />
+      <ns0:_logging_behavior>
+        <ns0:_exclude>false</ns0:_exclude>
+        <ns0:_include>false</ns0:_include>
+      </ns0:_logging_behavior>
+      <ns0:_timing>
+        <ns0:_timing_weight />
+        <ns0:_timing_avg />
+        <ns0:explanations />
+      </ns0:_timing>
+      <ns0:_shifting>
+        <ns0:_shifting_type>Duration</ns0:_shifting_type>
+      </ns0:_shifting>
+      <ns0:_context_data_analysis>
+        <ns0:probes />
+        <ns0:ips />
+      </ns0:_context_data_analysis>
+      <ns0:report>
+        <ns0:url />
+      </ns0:report>
+      <ns0:_notes>
+        <ns0:_notes_general />
+      </ns0:_notes>
+    </ns0:annotations>
+    <ns0:documentation>
+      <ns0:input />
+      <ns0:output />
+      <ns0:implementation>
+        <ns0:description />
+      </ns0:implementation>
+    </ns0:documentation>
+  </ns0:call>
+  <ns0:choose mode="exclusive" label="">
+    <ns0:alternative eid="e3" condition="data.venepuncture_status = &quot;failed&quot;">
+      <ns0:_probability>
+        <ns0:_probability_min />
+        <ns0:_probability_max />
+        <ns0:_probability_avg />
+      </ns0:_probability>
+      <ns0:call id="a5" endpoint="consentrequest">
+        <ns0:parameters>
+          <ns0:label>Ask for consent</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout />
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+      <ns0:choose mode="exclusive" label="">
+        <ns0:alternative eid="e2" condition="not data.consent">
+          <ns0:_probability>
+            <ns0:_probability_min />
+            <ns0:_probability_max />
+            <ns0:_probability_avg />
+          </ns0:_probability>
+          <ns0:call id="a6" endpoint="abortbloodcollection">
+            <ns0:parameters>
+              <ns0:label>Abort Blood Collection</ns0:label>
+              <ns0:color />
+              <ns0:arguments>
+                <ns0:timeout>1</ns0:timeout>
+                <ns0:data />
+              </ns0:arguments>
+            </ns0:parameters>
+            <ns0:annotations>
+              <ns0:_generic />
+              <ns0:_logging_behavior>
+                <ns0:_exclude>false</ns0:_exclude>
+                <ns0:_include>false</ns0:_include>
+              </ns0:_logging_behavior>
+              <ns0:_timing>
+                <ns0:_timing_weight />
+                <ns0:_timing_avg />
+                <ns0:explanations />
+              </ns0:_timing>
+              <ns0:_shifting>
+                <ns0:_shifting_type>Duration</ns0:_shifting_type>
+              </ns0:_shifting>
+              <ns0:_context_data_analysis>
+                <ns0:probes />
+                <ns0:ips />
+              </ns0:_context_data_analysis>
+              <ns0:report>
+                <ns0:url />
+              </ns0:report>
+              <ns0:_notes>
+                <ns0:_notes_general />
+              </ns0:_notes>
+            </ns0:annotations>
+            <ns0:documentation>
+              <ns0:input />
+              <ns0:output />
+              <ns0:implementation>
+                <ns0:description />
+              </ns0:implementation>
+            </ns0:documentation>
+          </ns0:call>
+          <ns0:terminate />
+        </ns0:alternative>
+        <ns0:otherwise>
+          <ns0:call id="a7" endpoint="attemptvenepuncture">
+            <ns0:parameters>
+              <ns0:label>Attempt Venepuncture</ns0:label>
+              <ns0:color />
+              <ns0:arguments>
+                <ns0:timeout>1</ns0:timeout>
+                <ns0:data />
+              </ns0:arguments>
+            </ns0:parameters>
+            <ns0:annotations>
+              <ns0:_generic />
+              <ns0:_logging_behavior>
+                <ns0:_exclude>false</ns0:_exclude>
+                <ns0:_include>false</ns0:_include>
+              </ns0:_logging_behavior>
+              <ns0:_timing>
+                <ns0:_timing_weight />
+                <ns0:_timing_avg />
+                <ns0:explanations />
+              </ns0:_timing>
+              <ns0:_shifting>
+                <ns0:_shifting_type>Duration</ns0:_shifting_type>
+              </ns0:_shifting>
+              <ns0:_context_data_analysis>
+                <ns0:probes />
+                <ns0:ips />
+              </ns0:_context_data_analysis>
+              <ns0:report>
+                <ns0:url />
+              </ns0:report>
+              <ns0:_notes>
+                <ns0:_notes_general />
+              </ns0:_notes>
+            </ns0:annotations>
+            <ns0:documentation>
+              <ns0:input />
+              <ns0:output />
+              <ns0:implementation>
+                <ns0:description />
+              </ns0:implementation>
+            </ns0:documentation>
+          </ns0:call>
+          <ns0:choose mode="exclusive" label="">
+            <ns0:alternative eid="e4" condition="data.venepuncture_status == &quot;failed&quot;">
+              <ns0:_probability>
+                <ns0:_probability_min />
+                <ns0:_probability_max />
+                <ns0:_probability_avg />
+              </ns0:_probability>
+              <ns0:call id="a8" endpoint="abortbloodcollection">
+                <ns0:parameters>
+                  <ns0:label>Abort Blood Collection</ns0:label>
+                  <ns0:color />
+                  <ns0:arguments>
+                    <ns0:timeout>1</ns0:timeout>
+                    <ns0:data />
+                  </ns0:arguments>
+                </ns0:parameters>
+                <ns0:annotations>
+                  <ns0:_generic />
+                  <ns0:_logging_behavior>
+                    <ns0:_exclude>false</ns0:_exclude>
+                    <ns0:_include>false</ns0:_include>
+                  </ns0:_logging_behavior>
+                  <ns0:_timing>
+                    <ns0:_timing_weight />
+                    <ns0:_timing_avg />
+                    <ns0:explanations />
+                  </ns0:_timing>
+                  <ns0:_shifting>
+                    <ns0:_shifting_type>Duration</ns0:_shifting_type>
+                  </ns0:_shifting>
+                  <ns0:_context_data_analysis>
+                    <ns0:probes />
+                    <ns0:ips />
+                  </ns0:_context_data_analysis>
+                  <ns0:report>
+                    <ns0:url />
+                  </ns0:report>
+                  <ns0:_notes>
+                    <ns0:_notes_general />
+                  </ns0:_notes>
+                </ns0:annotations>
+                <ns0:documentation>
+                  <ns0:input />
+                  <ns0:output />
+                  <ns0:implementation>
+                    <ns0:description />
+                  </ns0:implementation>
+                </ns0:documentation>
+              </ns0:call>
+              <ns0:terminate />
+            </ns0:alternative>
+            <ns0:otherwise />
+          </ns0:choose>
+        </ns0:otherwise>
+      </ns0:choose>
+    </ns0:alternative>
+    <ns0:otherwise />
+  </ns0:choose>
+  <ns0:parallel wait="0" cancel="last">
+    <ns0:parallel_branch>
+      <ns0:loop mode="pre_test" condition=" True">
+        <ns0:_probability>
+          <ns0:_probability_min />
+          <ns0:_probability_max />
+          <ns0:_probability_avg />
+        </ns0:_probability>
+        <ns0:call id="a15" endpoint="timeout">
+          <ns0:parameters>
+            <ns0:label>Invert every 30 seconds</ns0:label>
+            <ns0:color />
+            <ns0:arguments>
+              <ns0:timeout>30</ns0:timeout>
+              <ns0:data />
+            </ns0:arguments>
+          </ns0:parameters>
+          <ns0:annotations>
+            <ns0:_generic />
+            <ns0:_logging_behavior>
+              <ns0:_exclude>false</ns0:_exclude>
+              <ns0:_include>false</ns0:_include>
+            </ns0:_logging_behavior>
+            <ns0:_timing>
+              <ns0:_timing_weight />
+              <ns0:_timing_avg />
+              <ns0:explanations />
+            </ns0:_timing>
+            <ns0:_shifting>
+              <ns0:_shifting_type>Duration</ns0:_shifting_type>
+            </ns0:_shifting>
+            <ns0:_context_data_analysis>
+              <ns0:probes />
+              <ns0:ips />
+            </ns0:_context_data_analysis>
+            <ns0:report>
+              <ns0:url />
+            </ns0:report>
+            <ns0:_notes>
+              <ns0:_notes_general />
+            </ns0:_notes>
+          </ns0:annotations>
+          <ns0:documentation>
+            <ns0:input />
+            <ns0:output />
+            <ns0:implementation>
+              <ns0:description />
+            </ns0:implementation>
+          </ns0:documentation>
+        </ns0:call>
+        <ns0:call id="a16" endpoint="invertcontainer">
+          <ns0:parameters>
+            <ns0:label>Invert Blood Container</ns0:label>
+            <ns0:color />
+            <ns0:arguments>
+              <ns0:timeout>1</ns0:timeout>
+              <ns0:data />
+            </ns0:arguments>
+          </ns0:parameters>
+          <ns0:annotations>
+            <ns0:_generic />
+            <ns0:_logging_behavior>
+              <ns0:_exclude>false</ns0:_exclude>
+              <ns0:_include>false</ns0:_include>
+            </ns0:_logging_behavior>
+            <ns0:_timing>
+              <ns0:_timing_weight />
+              <ns0:_timing_avg />
+              <ns0:explanations />
+            </ns0:_timing>
+            <ns0:_shifting>
+              <ns0:_shifting_type>Duration</ns0:_shifting_type>
+            </ns0:_shifting>
+            <ns0:_context_data_analysis>
+              <ns0:probes />
+              <ns0:ips />
+            </ns0:_context_data_analysis>
+            <ns0:report>
+              <ns0:url />
+            </ns0:report>
+            <ns0:_notes>
+              <ns0:_notes_general />
+            </ns0:_notes>
+          </ns0:annotations>
+          <ns0:documentation>
+            <ns0:input />
+            <ns0:output />
+            <ns0:implementation>
+              <ns0:description />
+            </ns0:implementation>
+          </ns0:documentation>
+        </ns0:call>
+      </ns0:loop>
+    </ns0:parallel_branch>
+    <ns0:parallel_branch>
+      <ns0:call id="a11" endpoint="timeout">
+        <ns0:parameters>
+          <ns0:label>Maximal Collection Time</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1500</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+      <ns0:call id="a12" endpoint="abortbloodcollection">
+        <ns0:parameters>
+          <ns0:label>Abord Blood Collection</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+      <ns0:terminate />
+    </ns0:parallel_branch>
+    <ns0:parallel_branch>
+      <ns0:loop mode="pre_test" condition="True">
+        <ns0:call id="a10" endpoint="timeout">
+          <ns0:parameters>
+            <ns0:label>Mix every 5 seconds</ns0:label>
+            <ns0:color />
+            <ns0:arguments>
+              <ns0:timeout>5</ns0:timeout>
+              <ns0:data />
+            </ns0:arguments>
+          </ns0:parameters>
+          <ns0:annotations>
+            <ns0:_generic />
+            <ns0:_logging_behavior>
+              <ns0:_exclude>false</ns0:_exclude>
+              <ns0:_include>false</ns0:_include>
+            </ns0:_logging_behavior>
+            <ns0:_timing>
+              <ns0:_timing_weight />
+              <ns0:_timing_avg />
+              <ns0:explanations />
+            </ns0:_timing>
+            <ns0:_shifting>
+              <ns0:_shifting_type>Duration</ns0:_shifting_type>
+            </ns0:_shifting>
+            <ns0:_context_data_analysis>
+              <ns0:probes />
+              <ns0:ips />
+            </ns0:_context_data_analysis>
+            <ns0:report>
+              <ns0:url />
+            </ns0:report>
+            <ns0:_notes>
+              <ns0:_notes_general />
+            </ns0:_notes>
+          </ns0:annotations>
+          <ns0:documentation>
+            <ns0:input />
+            <ns0:output />
+            <ns0:implementation>
+              <ns0:description />
+            </ns0:implementation>
+          </ns0:documentation>
+        </ns0:call>
+        <ns0:_probability>
+          <ns0:_probability_min />
+          <ns0:_probability_max />
+          <ns0:_probability_avg />
+        </ns0:_probability>
+        <ns0:call id="a9" endpoint="mixwithanticoagulant">
+          <ns0:parameters>
+            <ns0:label>Mix with anticoagulant</ns0:label>
+            <ns0:color />
+            <ns0:arguments>
+              <ns0:timeout>1</ns0:timeout>
+              <ns0:data />
+            </ns0:arguments>
+          </ns0:parameters>
+          <ns0:annotations>
+            <ns0:_generic />
+            <ns0:_logging_behavior>
+              <ns0:_exclude>false</ns0:_exclude>
+              <ns0:_include>false</ns0:_include>
+            </ns0:_logging_behavior>
+            <ns0:_timing>
+              <ns0:_timing_weight />
+              <ns0:_timing_avg />
+              <ns0:explanations />
+            </ns0:_timing>
+            <ns0:_shifting>
+              <ns0:_shifting_type>Duration</ns0:_shifting_type>
+            </ns0:_shifting>
+            <ns0:_context_data_analysis>
+              <ns0:probes />
+              <ns0:ips />
+            </ns0:_context_data_analysis>
+            <ns0:report>
+              <ns0:url />
+            </ns0:report>
+            <ns0:_notes>
+              <ns0:_notes_general />
+            </ns0:_notes>
+          </ns0:annotations>
+          <ns0:documentation>
+            <ns0:input />
+            <ns0:output />
+            <ns0:implementation>
+              <ns0:description />
+            </ns0:implementation>
+          </ns0:documentation>
+        </ns0:call>
+      </ns0:loop>
+    </ns0:parallel_branch>
+    <ns0:parallel_branch>
+      <ns0:call id="a13" endpoint="collectblood">
+        <ns0:parameters>
+          <ns0:label>Collect Blood</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+    </ns0:parallel_branch>
+  </ns0:parallel>
+  <ns0:parallel wait="0" cancel="last">
+    <ns0:parallel_branch>
+      <ns0:call id="a14" endpoint="monitorbleeding">
+        <ns0:parameters>
+          <ns0:label>Monitor Bleeding</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+    </ns0:parallel_branch>
+    <ns0:parallel_branch>
+      <ns0:call id="a17" endpoint="timeout">
+        <ns0:parameters>
+          <ns0:label>Bleeding Exceed 15 Minutes</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1500</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+      <ns0:call id="a18" endpoint="informphysician">
+        <ns0:parameters>
+          <ns0:label>Inform Physician</ns0:label>
+          <ns0:color />
+          <ns0:arguments>
+            <ns0:timeout>1</ns0:timeout>
+            <ns0:data />
+          </ns0:arguments>
+        </ns0:parameters>
+        <ns0:annotations>
+          <ns0:_generic />
+          <ns0:_logging_behavior>
+            <ns0:_exclude>false</ns0:_exclude>
+            <ns0:_include>false</ns0:_include>
+          </ns0:_logging_behavior>
+          <ns0:_timing>
+            <ns0:_timing_weight />
+            <ns0:_timing_avg />
+            <ns0:explanations />
+          </ns0:_timing>
+          <ns0:_shifting>
+            <ns0:_shifting_type>Duration</ns0:_shifting_type>
+          </ns0:_shifting>
+          <ns0:_context_data_analysis>
+            <ns0:probes />
+            <ns0:ips />
+          </ns0:_context_data_analysis>
+          <ns0:report>
+            <ns0:url />
+          </ns0:report>
+          <ns0:_notes>
+            <ns0:_notes_general />
+          </ns0:_notes>
+        </ns0:annotations>
+        <ns0:documentation>
+          <ns0:input />
+          <ns0:output />
+          <ns0:implementation>
+            <ns0:description />
+          </ns0:implementation>
+        </ns0:documentation>
+      </ns0:call>
+    </ns0:parallel_branch>
+  </ns0:parallel>
+  <ns0:stop id="a21" />
+</ns0:description>
+  <transformation>
+    <description type="copy"/>
+    <dataelements type="none"/>
+    <endpoints type="none"/>
+  </transformation>
+  <subscriptions xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
+    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_compliance" url="https://power.bpm.cit.tum.de/compliance/Subscriber">
+      <topic id="description">
+        <event>change</event>
+      </topic>
+    </subscription>
+  </subscriptions>
+</testset>

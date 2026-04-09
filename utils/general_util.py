@@ -20,6 +20,41 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+ns1 = {"ns0": "http://cpee.org/ns/description/1.0"}
+ns2 = {"ns1": "http://cpee.org/ns/properties/2.0"}
+
+ns1v = "http://cpee.org/ns/description/1.0"
+ns2v = "http://cpee.org/ns/properties/2.0"
+
+
+def add_Basic(handler = "ruby", endpoints = None, guarded = "none", info = "test", modeltype = "CPEE", theme = "extended", creator = "Christine Ashcreek", author = "Christine Ashcreek", uuid = "8e9e4190-a6bb-4aad-a29a-80fcd072ff31", design_dir = "Staff.dir/Loebbi.dir/Declarative.dir", stage = "development"):
+    #testset = ET.Element("testset", nsmap = ns2)
+    testset = ET.Element("testset", nsmap={None: ns2v})
+    ET.SubElement(testset, 'executionhandler').text = handler
+    dataelements = ET.SubElement(testset, 'dataelements')
+    ## Could add dataelement adding here
+    endpoints = ET.SubElement(testset, 'endpoints')
+    ET.SubElement(endpoints, 'timeout').text = "https://cpee.org/services/timeout.php"
+    ET.SubElement(endpoints, 'subprocess').text = "https://cpee.org/flow/start/url/"
+    ## Could add support for different endpoint connecting here
+    attributes = ET.SubElement(testset, 'attributes')
+    ET.SubElement(attributes, 'guarded').text = guarded
+    ET.SubElement(attributes, 'info').text = info
+    ET.SubElement(attributes, 'modeltype').text = modeltype
+    ET.SubElement(attributes, 'theme').text = theme
+    ET.SubElement(attributes, 'creator').text = creator
+    ET.SubElement(attributes, 'guarded_id')
+    ET.SubElement(attributes, 'author').text = author
+    ET.SubElement(attributes, 'model_uuid').text = uuid
+    ET.SubElement(attributes, 'model_version')
+    ET.SubElement(attributes, 'design_dir').text = design_dir
+    ET.SubElement(attributes, 'design_stage').text = stage
+    description = process_tree = ET.SubElement(testset, 'description')
+    #process_tree = ET.SubElement(description, 'description', nsmap = ns1)
+    process_tree = ET.SubElement(description, "description", nsmap={None: ns1v})
+    return testset, process_tree
+
+
 def transform_log(log, call_id = "local testing", cpee_instance = "local testing"):
     instance = None
     event_log = []
@@ -59,6 +94,13 @@ def add_start_end(tree):
     tree.insert(0, new_first_sibling)
 
     tree.append(new_last_sibling)
+    return tree
+
+def remove_start_end(tree):
+    ns = "http://cpee.org/ns/description/1.0"
+    for tag in ["start_activity", "end_activity"]:
+        for elem in tree.findall("{%s}%s" % (ns, tag)):
+            tree.remove(elem)
     return tree
 
 
