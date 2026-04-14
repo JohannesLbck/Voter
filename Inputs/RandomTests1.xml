@@ -1,0 +1,84 @@
+<testset xmlns="http://cpee.org/ns/properties/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements/>
+  <endpoints>
+    <timeout>https-post://cpee.org/services/timeout.php</timeout>
+    <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+  </endpoints>
+  <attributes>
+    <guarded>none</guarded>
+    <modeltype>CPEE</modeltype>
+    <theme>extended</theme>
+    <guarded_id/>
+    <info>RandomTests1</info>
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <model_uuid>fb7f8ddb-f56b-4317-9068-9606b0d68219</model_uuid>
+    <model_version/>
+    <design_stage>development</design_stage>
+    <design_dir>Staff.dir/Loebbi.dir/Voting.dir</design_dir>
+  </attributes>
+  <description>
+    <description xmlns="http://cpee.org/ns/description/1.0">
+      <loop mode="pre_test" condition="true">
+        <_probability>
+          <_probability_min/>
+          <_probability_max/>
+          <_probability_avg/>
+        </_probability>
+        <call id="a1" endpoint="timeout">
+          <parameters>
+            <label/>
+            <color/>
+            <method>:post</method>
+            <arguments>
+              <timeout>1</timeout>
+              <data/>
+            </arguments>
+          </parameters>
+          <annotations>
+            <_generic/>
+            <_timing>
+              <_timing_weight/>
+              <_timing_avg/>
+              <explanations/>
+            </_timing>
+            <_shifting>
+              <_shifting_type>Duration</_shifting_type>
+            </_shifting>
+            <_context_data_analysis>
+              <probes/>
+              <ips/>
+            </_context_data_analysis>
+            <report>
+              <url/>
+            </report>
+            <_notes>
+              <_notes_general/>
+            </_notes>
+          </annotations>
+          <documentation>
+            <input/>
+            <output/>
+            <implementation>
+              <description/>
+            </implementation>
+          </documentation>
+        </call>
+        <stop id="a2"/>
+      </loop>
+    </description>
+  </description>
+  <transformation>
+    <description type="copy"/>
+    <dataelements type="none"/>
+    <endpoints type="none"/>
+  </transformation>
+  <subscriptions xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
+    <subscription xmlns="http://riddl.org/ns/common-patterns/notifications-producer/2.0" id="_vote" url="https://lehre.bpm.in.tum.de/ports/12849/">
+      <topic id="activity">
+        <vote>syncing_after</vote>
+      </topic>
+    </subscription>
+  </subscriptions>
+</testset>

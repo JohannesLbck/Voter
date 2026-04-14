@@ -22,7 +22,7 @@
   </endpoints>
   <attributes>
     <guarded>none</guarded>
-    <info>RunningExamplewithTimeouts</info>
+    <info>RunningExampleWithTimeoutsClean</info>
     <modeltype>CPEE</modeltype>
     <theme>packed</theme>
     <guarded_id />
@@ -32,58 +32,10 @@
     <model_version />
     <design_stage>development</design_stage>
     <design_dir>Staff.dir/Loebbi.dir/Voting.dir</design_dir>
-    <requirements>{     "R1"=&gt;"precedence('Collect Blood', 'Identify Patient')",     "R2"=&gt;"recurring('Collect Blood','Mix with anticoagulant', 10)",     "R3"=&gt;"maxExecTime('Collect Blood','Abord Blood Collection', 300)",     "R4"=&gt;"recurring('Collect Blood', 'Invert Blood Container', 30)" }</requirements>
+    <requirements>{     "R1"=&gt;"wait_for_event_between('Disinfect Venepunture Site', 'Attempt Venepuncture', 'Wait for disinfectant to dry')",     "R2"=&gt;"recurring('Collect Blood','Mix with anticoagulant', 10)",     "R3"=&gt;"maxExecTime('Collect Blood','Abord Blood Collection', 300)",     "R4"=&gt;"recurring('Collect Blood', 'Invert Blood Container', 30)" }</requirements>
   </attributes>
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">
-      <call id="a1" endpoint="identifyvenepuncturesite">
-        <parameters>
-          <label>Identify Venepunture Site</label>
-          <color />
-          <arguments>
-            <timeout>5</timeout>
-            <data />
-          </arguments>
-        </parameters>
-        <annotations>
-          <_generic />
-          <_logging_behavior>
-            <_exclude>false</_exclude>
-            <_include>false</_include>
-          </_logging_behavior>
-          <_timing>
-            <_timing_weight />
-            <_timing_avg />
-            <explanations />
-          </_timing>
-          <_shifting>
-            <_shifting_type>Duration</_shifting_type>
-          </_shifting>
-          <_context_data_analysis>
-            <probes />
-            <ips />
-          </_context_data_analysis>
-          <report>
-            <url />
-          </report>
-          <_notes>
-            <_notes_general />
-          </_notes>
-        </annotations>
-        <documentation>
-          <input />
-          <output />
-          <implementation>
-            <description xmlns="http://cpee.org/ns/description/1.0" />
-          </implementation>
-        </documentation>
-        <code>
-          <prepare />
-          <finalize output="result" />
-          <update output="result" />
-          <rescue output="result" />
-        </code>
-      </call>
       <call id="a2" endpoint="disinfectvenepuncturesite">
         <parameters>
           <label>Disinfect Venepunture Site</label>
@@ -132,14 +84,61 @@
           <rescue output="result" />
         </code>
       </call>
-      <parallel wait="-1" cancel="last">
-        <parallel_branch>
-          <call id="a3" endpoint="consentrequest">
+      <call id="a3" endpoint="consentrequest">
+        <parameters>
+          <label>Ask for consent</label>
+          <color />
+          <arguments>
+            <timeout>1</timeout>
+            <data />
+          </arguments>
+        </parameters>
+        <annotations>
+          <_generic />
+          <_logging_behavior>
+            <_exclude>false</_exclude>
+            <_include>false</_include>
+          </_logging_behavior>
+          <_timing>
+            <_timing_weight />
+            <_timing_avg />
+            <explanations />
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes />
+            <ips />
+          </_context_data_analysis>
+          <report>
+            <url />
+          </report>
+          <_notes>
+            <_notes_general />
+          </_notes>
+        </annotations>
+        <documentation>
+          <input />
+          <output />
+          <implementation>
+            <description xmlns="http://cpee.org/ns/description/1.0" />
+          </implementation>
+        </documentation>
+      </call>
+      <choose mode="exclusive" label="">
+        <alternative eid="e1" condition="not data.consent">
+          <_probability>
+            <_probability_min />
+            <_probability_max />
+            <_probability_avg />
+          </_probability>
+          <call id="a19" endpoint="abortbloodcollection">
             <parameters>
-              <label>Ask for consent</label>
+              <label>Abort Blood Collection</label>
               <color />
               <arguments>
-                <timeout>1</timeout>
+                <timeout />
                 <data />
               </arguments>
             </parameters>
@@ -176,105 +175,10 @@
               </implementation>
             </documentation>
           </call>
-          <choose mode="exclusive" label="">
-            <alternative eid="e1" condition="not data.consent">
-              <_probability>
-                <_probability_min />
-                <_probability_max />
-                <_probability_avg />
-              </_probability>
-              <call id="a19" endpoint="abortbloodcollection">
-                <parameters>
-                  <label>Abort Blood Collection</label>
-                  <color />
-                  <arguments>
-                    <timeout />
-                    <data />
-                  </arguments>
-                </parameters>
-                <annotations>
-                  <_generic />
-                  <_logging_behavior>
-                    <_exclude>false</_exclude>
-                    <_include>false</_include>
-                  </_logging_behavior>
-                  <_timing>
-                    <_timing_weight />
-                    <_timing_avg />
-                    <explanations />
-                  </_timing>
-                  <_shifting>
-                    <_shifting_type>Duration</_shifting_type>
-                  </_shifting>
-                  <_context_data_analysis>
-                    <probes />
-                    <ips />
-                  </_context_data_analysis>
-                  <report>
-                    <url />
-                  </report>
-                  <_notes>
-                    <_notes_general />
-                  </_notes>
-                </annotations>
-                <documentation>
-                  <input />
-                  <output />
-                  <implementation>
-                    <description xmlns="http://cpee.org/ns/description/1.0" />
-                  </implementation>
-                </documentation>
-              </call>
-              <terminate />
-            </alternative>
-            <otherwise />
-          </choose>
-        </parallel_branch>
-        <parallel_branch>
-          <call id="a20" endpoint="waituntildried">
-            <parameters>
-              <label>Wait for disinfectant to dry</label>
-              <color />
-              <arguments>
-                <timeout>30</timeout>
-                <data />
-              </arguments>
-            </parameters>
-            <annotations>
-              <_generic />
-              <_logging_behavior>
-                <_exclude>false</_exclude>
-                <_include>false</_include>
-              </_logging_behavior>
-              <_timing>
-                <_timing_weight />
-                <_timing_avg />
-                <explanations />
-              </_timing>
-              <_shifting>
-                <_shifting_type>Duration</_shifting_type>
-              </_shifting>
-              <_context_data_analysis>
-                <probes />
-                <ips />
-              </_context_data_analysis>
-              <report>
-                <url />
-              </report>
-              <_notes>
-                <_notes_general />
-              </_notes>
-            </annotations>
-            <documentation>
-              <input />
-              <output />
-              <implementation>
-                <description xmlns="http://cpee.org/ns/description/1.0" />
-              </implementation>
-            </documentation>
-          </call>
-        </parallel_branch>
-      </parallel>
+          <terminate />
+        </alternative>
+        <otherwise />
+      </choose>
       <call id="a4" endpoint="attemptvenepuncture">
         <parameters>
           <label>Attempt Venepuncture</label>
@@ -317,207 +221,6 @@
           </implementation>
         </documentation>
       </call>
-      <choose mode="exclusive" label="">
-        <alternative eid="e3" condition="data.venepuncture_status = &quot;failed&quot;">
-          <_probability>
-            <_probability_min />
-            <_probability_max />
-            <_probability_avg />
-          </_probability>
-          <call id="a5" endpoint="consentrequest">
-            <parameters>
-              <label>Ask for consent</label>
-              <color />
-              <arguments>
-                <timeout />
-                <data />
-              </arguments>
-            </parameters>
-            <annotations>
-              <_generic />
-              <_logging_behavior>
-                <_exclude>false</_exclude>
-                <_include>false</_include>
-              </_logging_behavior>
-              <_timing>
-                <_timing_weight />
-                <_timing_avg />
-                <explanations />
-              </_timing>
-              <_shifting>
-                <_shifting_type>Duration</_shifting_type>
-              </_shifting>
-              <_context_data_analysis>
-                <probes />
-                <ips />
-              </_context_data_analysis>
-              <report>
-                <url />
-              </report>
-              <_notes>
-                <_notes_general />
-              </_notes>
-            </annotations>
-            <documentation>
-              <input />
-              <output />
-              <implementation>
-                <description xmlns="http://cpee.org/ns/description/1.0" />
-              </implementation>
-            </documentation>
-          </call>
-          <choose mode="exclusive" label="">
-            <alternative eid="e2" condition="not data.consent">
-              <_probability>
-                <_probability_min />
-                <_probability_max />
-                <_probability_avg />
-              </_probability>
-              <call id="a6" endpoint="abortbloodcollection">
-                <parameters>
-                  <label>Abort Blood Collection</label>
-                  <color />
-                  <arguments>
-                    <timeout>1</timeout>
-                    <data />
-                  </arguments>
-                </parameters>
-                <annotations>
-                  <_generic />
-                  <_logging_behavior>
-                    <_exclude>false</_exclude>
-                    <_include>false</_include>
-                  </_logging_behavior>
-                  <_timing>
-                    <_timing_weight />
-                    <_timing_avg />
-                    <explanations />
-                  </_timing>
-                  <_shifting>
-                    <_shifting_type>Duration</_shifting_type>
-                  </_shifting>
-                  <_context_data_analysis>
-                    <probes />
-                    <ips />
-                  </_context_data_analysis>
-                  <report>
-                    <url />
-                  </report>
-                  <_notes>
-                    <_notes_general />
-                  </_notes>
-                </annotations>
-                <documentation>
-                  <input />
-                  <output />
-                  <implementation>
-                    <description xmlns="http://cpee.org/ns/description/1.0" />
-                  </implementation>
-                </documentation>
-              </call>
-              <terminate />
-            </alternative>
-            <otherwise>
-              <call id="a7" endpoint="attemptvenepuncture">
-                <parameters>
-                  <label>Attempt Venepuncture</label>
-                  <color />
-                  <arguments>
-                    <timeout>1</timeout>
-                    <data />
-                  </arguments>
-                </parameters>
-                <annotations>
-                  <_generic />
-                  <_logging_behavior>
-                    <_exclude>false</_exclude>
-                    <_include>false</_include>
-                  </_logging_behavior>
-                  <_timing>
-                    <_timing_weight />
-                    <_timing_avg />
-                    <explanations />
-                  </_timing>
-                  <_shifting>
-                    <_shifting_type>Duration</_shifting_type>
-                  </_shifting>
-                  <_context_data_analysis>
-                    <probes />
-                    <ips />
-                  </_context_data_analysis>
-                  <report>
-                    <url />
-                  </report>
-                  <_notes>
-                    <_notes_general />
-                  </_notes>
-                </annotations>
-                <documentation>
-                  <input />
-                  <output />
-                  <implementation>
-                    <description xmlns="http://cpee.org/ns/description/1.0" />
-                  </implementation>
-                </documentation>
-              </call>
-              <choose mode="exclusive" label="">
-                <alternative eid="e4" condition="data.venepuncture_status == &quot;failed&quot;">
-                  <_probability>
-                    <_probability_min />
-                    <_probability_max />
-                    <_probability_avg />
-                  </_probability>
-                  <call id="a8" endpoint="abortbloodcollection">
-                    <parameters>
-                      <label>Abort Blood Collection</label>
-                      <color />
-                      <arguments>
-                        <timeout>1</timeout>
-                        <data />
-                      </arguments>
-                    </parameters>
-                    <annotations>
-                      <_generic />
-                      <_logging_behavior>
-                        <_exclude>false</_exclude>
-                        <_include>false</_include>
-                      </_logging_behavior>
-                      <_timing>
-                        <_timing_weight />
-                        <_timing_avg />
-                        <explanations />
-                      </_timing>
-                      <_shifting>
-                        <_shifting_type>Duration</_shifting_type>
-                      </_shifting>
-                      <_context_data_analysis>
-                        <probes />
-                        <ips />
-                      </_context_data_analysis>
-                      <report>
-                        <url />
-                      </report>
-                      <_notes>
-                        <_notes_general />
-                      </_notes>
-                    </annotations>
-                    <documentation>
-                      <input />
-                      <output />
-                      <implementation>
-                        <description xmlns="http://cpee.org/ns/description/1.0" />
-                      </implementation>
-                    </documentation>
-                  </call>
-                  <terminate />
-                </alternative>
-                <otherwise />
-              </choose>
-            </otherwise>
-          </choose>
-        </alternative>
-        <otherwise />
-      </choose>
       <parallel wait="0" cancel="last">
         <parallel_branch>
           <loop mode="pre_test" condition=" True">
@@ -613,6 +316,93 @@
           </loop>
         </parallel_branch>
         <parallel_branch>
+          <call id="a11" endpoint="timeout">
+            <parameters>
+              <label>Maximal Collection Time</label>
+              <color />
+              <arguments>
+                <timeout>300</timeout>
+                <data />
+              </arguments>
+            </parameters>
+            <annotations>
+              <_generic />
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
+              <_timing>
+                <_timing_weight />
+                <_timing_avg />
+                <explanations />
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes />
+                <ips />
+              </_context_data_analysis>
+              <report>
+                <url />
+              </report>
+              <_notes>
+                <_notes_general />
+              </_notes>
+            </annotations>
+            <documentation>
+              <input />
+              <output />
+              <implementation>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </implementation>
+            </documentation>
+          </call>
+          <call id="a12" endpoint="abortbloodcollection">
+            <parameters>
+              <label>Abord Blood Collection</label>
+              <color />
+              <arguments>
+                <timeout>1</timeout>
+                <data />
+              </arguments>
+            </parameters>
+            <annotations>
+              <_generic />
+              <_logging_behavior>
+                <_exclude>false</_exclude>
+                <_include>false</_include>
+              </_logging_behavior>
+              <_timing>
+                <_timing_weight />
+                <_timing_avg />
+                <explanations />
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes />
+                <ips />
+              </_context_data_analysis>
+              <report>
+                <url />
+              </report>
+              <_notes>
+                <_notes_general />
+              </_notes>
+            </annotations>
+            <documentation>
+              <input />
+              <output />
+              <implementation>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </implementation>
+            </documentation>
+          </call>
+          <terminate />
+        </parallel_branch>
+        <parallel_branch>
           <call id="a13" endpoint="collectblood">
             <parameters>
               <label>Collect Blood</label>
@@ -657,139 +447,6 @@
           </call>
         </parallel_branch>
       </parallel>
-      <parallel wait="0" cancel="last">
-        <parallel_branch>
-          <call id="a14" endpoint="monitorbleeding">
-            <parameters>
-              <label>Monitor Bleeding</label>
-              <color />
-              <arguments>
-                <timeout>1</timeout>
-                <data />
-              </arguments>
-            </parameters>
-            <annotations>
-              <_generic />
-              <_logging_behavior>
-                <_exclude>false</_exclude>
-                <_include>false</_include>
-              </_logging_behavior>
-              <_timing>
-                <_timing_weight />
-                <_timing_avg />
-                <explanations />
-              </_timing>
-              <_shifting>
-                <_shifting_type>Duration</_shifting_type>
-              </_shifting>
-              <_context_data_analysis>
-                <probes />
-                <ips />
-              </_context_data_analysis>
-              <report>
-                <url />
-              </report>
-              <_notes>
-                <_notes_general />
-              </_notes>
-            </annotations>
-            <documentation>
-              <input />
-              <output />
-              <implementation>
-                <description xmlns="http://cpee.org/ns/description/1.0" />
-              </implementation>
-            </documentation>
-          </call>
-        </parallel_branch>
-        <parallel_branch>
-          <call id="a17" endpoint="timeout">
-            <parameters>
-              <label>Bleeding Exceed 15 Minutes</label>
-              <color />
-              <arguments>
-                <timeout>300</timeout>
-                <data />
-              </arguments>
-            </parameters>
-            <annotations>
-              <_generic />
-              <_logging_behavior>
-                <_exclude>false</_exclude>
-                <_include>false</_include>
-              </_logging_behavior>
-              <_timing>
-                <_timing_weight />
-                <_timing_avg />
-                <explanations />
-              </_timing>
-              <_shifting>
-                <_shifting_type>Duration</_shifting_type>
-              </_shifting>
-              <_context_data_analysis>
-                <probes />
-                <ips />
-              </_context_data_analysis>
-              <report>
-                <url />
-              </report>
-              <_notes>
-                <_notes_general />
-              </_notes>
-            </annotations>
-            <documentation>
-              <input />
-              <output />
-              <implementation>
-                <description xmlns="http://cpee.org/ns/description/1.0" />
-              </implementation>
-            </documentation>
-          </call>
-          <call id="a18" endpoint="informphysician">
-            <parameters>
-              <label>Inform Physician</label>
-              <color />
-              <arguments>
-                <timeout>1</timeout>
-                <data />
-              </arguments>
-            </parameters>
-            <annotations>
-              <_generic />
-              <_logging_behavior>
-                <_exclude>false</_exclude>
-                <_include>false</_include>
-              </_logging_behavior>
-              <_timing>
-                <_timing_weight />
-                <_timing_avg />
-                <explanations />
-              </_timing>
-              <_shifting>
-                <_shifting_type>Duration</_shifting_type>
-              </_shifting>
-              <_context_data_analysis>
-                <probes />
-                <ips />
-              </_context_data_analysis>
-              <report>
-                <url />
-              </report>
-              <_notes>
-                <_notes_general />
-              </_notes>
-            </annotations>
-            <documentation>
-              <input />
-              <output />
-              <implementation>
-                <description xmlns="http://cpee.org/ns/description/1.0" />
-              </implementation>
-            </documentation>
-          </call>
-        </parallel_branch>
-      </parallel>
-      <stop id="a21" />
     </description>
   </description>
   <transformation>

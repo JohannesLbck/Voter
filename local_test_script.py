@@ -1,3 +1,4 @@
+import os
 import xml.etree.ElementTree as ET
 import copy
 import logging
@@ -75,7 +76,8 @@ def print_structure(elem, indent=0):
         print_structure(child, indent + 1)
 
 def main():
-    process_file = "Processes/RunningExamplewithTimeouts.xml"
+    #process_file = "Inputs/RunningExamplewithTimeouts.xml"
+    process_file = "Inputs/RunningExampleSimplified.xml"
     print(f"Loading process from: {process_file}")
 
     full_tree = ET.parse(process_file)
@@ -125,7 +127,7 @@ def main():
         # Remove start/end from the copy
         remove_start_end(inner_desc)
 
-        out_file = f"Outputs/modified_tree_local_{counter}_{int(time.time())}.xml"
+        out_file = f"Outputs/modified_{os.path.basename(process_file)}_{counter}_{int(time.time())}.xml"
         ET.indent(out_root)
         xml_bytes = ET.tostring(out_root, encoding='UTF-8', xml_declaration=True)
         xml_bytes = _fix_description_ns(xml_bytes)

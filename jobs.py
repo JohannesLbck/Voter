@@ -38,6 +38,32 @@ class Jobs:
             abandon_job = {**job, "Phase": "after", "Pattern": "abandon_recurring", "target": target}
             return abandon_job
 
+    def open_wait_for_event(self, job, callback):
+        """Open instance of a wait for event pattern."""
+        logger.info(f'Open wait for event instance: {job}')
+        tree = WaitForEvent(job["C_Endpoint"])
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running"}, files={"xml": ("xml", tree, "text/xml")})
+        if response.status_code != 200:
+            logger.error(f'Failed to open wait for event instance: {response.status_code} {response.text}')
+        else:
+            response_json = json.loads(response.text)
+            target = response_json.get("CPEE-INSTANCE")
+            abandon_job = {**job, "CallerID": job["B_ID"], "Phase": "before", "Pattern": "check_wait_for_event", "target": target}
+            return abandon_job
+
+    def open_wait_for_timeout(self, job, callback):
+        """Open instance of a wait for timeout pattern."""
+        logger.info(f'Open wait for timeout instance: {job}')
+        tree = MaxExecTime(job["Time"], "")
+        response = requests.post(SUBPROCESS_URL, data={"behavior": "fork_running"}, files={"xml": ("xml", tree, "text/xml")})
+        if response.status_code != 200:
+            logger.error(f'Failed to open wait for timeout instance: {response.status_code} {response.text}')
+        else:
+            response_json = json.loads(response.text)
+            target = response_json.get("CPEE-INSTANCE")
+            abandon_job = {**job, "CallerID": job["B_ID"], "Phase": "before", "Pattern": "check_wait_for_timeout", "target": target}
+            return abandon_job
+
     # --- vote_syncing_after jobs ---
 
     def abandon_max_exec_time(self, job, callback):
@@ -52,11 +78,45 @@ class Jobs:
         # TODO: implement abandon recurring instance
         pass
 
+    def check_wait_for_event(self, job, callback):
+        """Check if the wait for event instance is finished."""
+        logger.info(f'Check wait for event instance: {job}')
+        target = job.get("target")
+        try:
+            response = requests.get(f"https://cpee.org/flow/engine/{target}/properties/state/")
+            state = response.text.strip()
+            logger.info(f'Wait for event instance {target} state: {state}')
+            if state == "finished":
+                logger.info(f'Wait for event instance {target} finished successfully')
+            else:
+                logger.warning(f'Wait for event instance {target} not finished yet, state: {state}')
+        except Exception as e:
+            logger.error(f'Failed to check wait for event instance {target}: {e}')
+
+    def check_wait_for_timeout(self, job, callback):
+        """Check if the wait for timeout instance is finished."""
+        logger.info(f'Check wait for timeout instance: {job}')
+        target = job.get("target")
+        try:
+            response = requests.get(f"https://cpee.org/flow/engine/{target}/properties/state/")
+            state = response.text.strip()
+            logger.info(f'Wait for timeout instance {target} state: {state}')
+            if state == "finished":
+                logger.info(f'Wait for timeout instance {target} finished successfully')
+            else:
+                logger.warning(f'Wait for timeout instance {target} not finished yet, state: {state}')
+        except Exception as e:
+            logger.error(f'Failed to check wait for timeout instance {target}: {e}')
+
     # --- dispatch ---
 
     BEFORE_DISPATCH = {
         "maxExecTime": "open_max_exec_time",
         "recurring": "open_recurring",
+        "wait_for_event_between": "open_wait_for_event",
+        "wait_for_timeout_between": "open_wait_for_timeout",
+        "check_wait_for_event": "check_wait_for_event",
+        "check_wait_for_timeout": "check_wait_for_timeout",
     }
 
     AFTER_DISPATCH = {

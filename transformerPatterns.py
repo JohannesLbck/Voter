@@ -17,7 +17,7 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from util import * 
-from modifierpatterns import recurring_modify, max_time_between_modify, wait_for_event_modify, max_exec_time_modify
+from modifierpatterns import recurring_modify, max_time_between_modify, wait_for_event_modify, max_exec_time_modify, wait_for_timeout_modify
 
 ## Check util which is an interface to all other methods if you want all method names
 
@@ -45,6 +45,7 @@ def recurring(tree, a, b, t):
     
     else:
         logger.info(f'Activity "{a}" is missing in the process, so the recurring requirement is trivially false')
+        return tree, None
 
 # maxExecTime: If a takes longer than time, b needs to be executed, mapped from timed_alternative
 def maxExecTime(tree, a, b, time):
@@ -62,7 +63,7 @@ def maxExecTime(tree, a, b, time):
                     "B_Endpoint" : b_endpoint_key}
     else:
         logger.info(f'Activity "{a}" is missing so the maximal execution time is by definition not exceeded, since the activity is never executed')
-        return None
+        return tree, None
 
 ## There are technically many ways to implement this and accordingly many ways this could be checked, we enforcce here a very visually pleasing way of enforcing this, which is a event based gateway with a timeout. If said timeout finishes first it would mean that the max time between has passed. This is just one of many ways such as adding syncs before and after a and b, but this would be much less checkable and also have several ways of implementing
 def max_time_between(tree, a, b, time, c = None):
@@ -81,22 +82,41 @@ def max_time_between(tree, a, b, time, c = None):
                     "C_Endpoint" : c_endpoint_key}
         else:
             logger.info(f'Activity "{b}" is missing in the process')
-            return None
+            return tree, None
     else:
         logger.info(f'Activity "{a}" is missing in the process')
-        return None
+        return tree, None
 
 ## Min Time between two activities, enforced via Voting
-def min_time_between(tree, a, b, time, c = None):
+def wait_for_event_between(tree, a, b, event):
     a_sync = None
-    if leads_to(tree, a, b):
+    if leads_to_helper(tree, a, b):
         apath = exists_by_label(tree, a)
         bpath = exists_by_label(tree, b)
-        ## Original Method had errors, but this pattern never appears in practice, so fix this later
-        return None
+        if apath is not None and bpath is not None:
+            if type(event) == int:
+                ## Event is a timeout with time event
+                modified_tree = wait_for_timeout_modify(tree, apath, bpath, event) # Creates the modified tree here
+                return modified_tree, {"CallerID" : apath.get("id"),
+                    "Phase": "before",
+                    "Pattern" : "wait_for_timeout_between",
+                    "B_ID" : bpath.get("id"),
+                    "Time" : event}
+            else:
+                c_path = exists_by_label(tree, event)
+                c_endpoint_key = c_path.get("endpoint") if c_path is not None else event
+                c_endpoint_key = c_endpoint_key if c_endpoint_key is not "" else event
+                modified_tree = wait_for_event_modify(tree, apath, bpath, c_path) # Creates the modified tree here
+                return modified_tree, {"CallerID" : apath.get("id"),
+                    "Phase": "before",
+                    "Pattern" : "wait_for_event_between",
+                    "B_ID" : bpath.get("id"),
+                    "Event" : event,
+                    "C_Endpoint" : c_endpoint_key}
+        return tree, None
     else:
-        logger.info(f'Activities "{a}" and "{b}" are not in a leads_to relationship, so the min_time_between requirement is False')
-        return None
+        logger.info(f'Activities "{a}" and "{b}" are not in a leads_to relationship, so the wait for event between requirement is False')
+        return tree, None
     
     
 
@@ -113,6 +133,40 @@ def by_due_date(tree, a, timestamp, c = None):
     return tree, None
 
 
+
+def leads_to_helper(tree, a, b):
+    apath = exists_by_label(tree, a)
+    bpath = exists_by_label(tree, b)
+    if apath is not None:
+        if bpath is not None:
+            compare = compare_ele(tree, apath, bpath)
+            if compare == 0:
+                logger.info(f'Activity "{a}" and Activity "{b}" are on different exclusive branches')
+                return False
+            elif compare == -1:
+                logger.info(f'Activity "{a}" and Activity "{b}" are in parrallel')
+                return False
+            elif compare == 1:
+                logger.info(f'Activity "{a}" is before Activity "{b}, checking if {b} is on a different exclusive branch"')
+                ancestors_a, ancestors_b, shared = get_shared_ancestors(tree, apath, bpath)
+                if any(elem.tag.endswith("choose") for elem in ancestors_b):
+                    MCA = shared[-1].tag
+                    if MCA.endswith("alternative") or MCA.endswith("otherwise") or MCA.endswith("parallel_branch"):
+                        logger.info(f'Activity "{a}" and Activity "{b}" are on the same branch in the correct order')
+                        return True
+                    logger.info(f'Activity "{a} was found before "{b}, but it is in a different exclusive branch, so leads_to can not be guaranteed in every trace')
+                    return False
+                logger.info(f'Activity "{a}" is before Activity "{b}" and they do not share any exclusive branches, so leads_to is guaranteed')
+                return True
+            elif compare == 2:
+                logger.info(f'Activity "{b}" is before Activity "{a}"')
+                return False
+        else:
+            logger.info(f'Activity "{b}" is not found in the tree')
+            return False 
+    else:
+        logger.info(f'Activity "{a}" is not found in the tree')
+        return True
 
 
 

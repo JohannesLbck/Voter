@@ -96,18 +96,62 @@ def recurring_modify(tree, a_ele, b_ele, time):
 
     return tree
 
-def wait_for_event_modify(tree, a_ele, b_ele, time):
+def _is_between(tree, a_ele, b_ele, target):
+    '''Check if target is inside a parallel that appears between a_ele and b_ele in the tree.
+    a_ele appears before the parallel, b_ele appears after it.'''
+    ancestors = get_ancestors(tree, target)
+    # Find the parallel_branch and parallel containing the target
+    for ancestor in ancestors:
+        if ancestor.tag.endswith("parallel") and not ancestor.tag.endswith("parallel_branch"):
+            # Check that a_ele and b_ele are NOT inside this parallel (they are before/after it)
+            a_ancestors = get_ancestors(tree, a_ele)
+            b_ancestors = get_ancestors(tree, b_ele)
+            if ancestor not in a_ancestors and ancestor not in b_ancestors:
+                return True
+    return False
+
+def wait_for_event_modify(tree, a_ele, b_ele, c_ele):
+    '''
+    This function modifies the tree such that, if the wait for event constraint is explicitly enforced,
+    then the parallel branch that contains the event call (c_ele) is removed.
+    a_ele and b_ele are before/after the parallel; c_ele is inside a parallel branch.
+    '''
+    if c_ele is None:
+        logger.warning("c_ele is None, cannot find event call to remove")
+        return tree
+    if _is_between(tree, a_ele, b_ele, c_ele):
+        logger.info(f"Removing event call branch with id {c_ele.get('id', 'unknown')} from parallel between a_ele and b_ele")
+        return _remove_branch_containing(tree, c_ele)
+    logger.warning("No matching event call found in a parallel between a_ele and b_ele for the wait_for_event constraint, returning original tree")
     return tree
 
-def remove_timeout(tree, timeout):
+def wait_for_timeout_modify(tree, a_ele, b_ele, time):
     '''
-    This function removes the entire parallel_branch containing the timeout from the tree.
-    If this leaves only a single branch in the parallel, then the parallel is removed
+    This function modifies the tree such that, if the wait for timeout constraint is explicitly enforced,
+    then the parallel branch that contains the timeout is removed.
+    a_ele and b_ele are before/after the parallel; the timeout is inside a parallel branch.
+    '''
+    for timeout in timeouts_exists(tree):
+        timeout_call = _find_timeout_call(tree, timeout[0])
+        if timeout_call is None:
+            continue
+        if _is_between(tree, a_ele, b_ele, timeout_call):
+            if not timeout[1].isdigit():
+                logger.warning(f"Time value {timeout[1]} is not a digit, Assume this is the correct timeout")
+                return remove_timeout(tree, timeout)
+            elif int(timeout[1]) == time:
+                logger.info(f"Removing timeout with id {timeout_call.get('id', 'unknown')} since it matches the time constraint")
+                return remove_timeout(tree, timeout)
+    logger.warning("No matching timeout found for the wait_for_timeout constraint, returning original tree")
+    return tree
+
+def _remove_branch_containing(tree, element):
+    '''
+    Removes the parallel_branch containing `element` from the tree.
+    If this leaves only a single branch in the parallel, the parallel is unwrapped
     and the remaining branch's children are placed directly in the parent.
     '''
-    # timeout[0] is the <timeout> element nested inside <call>/<parameters>/<arguments>.
-    # Walk up the ancestor chain to find the containing parallel_branch and parallel.
-    ancestors = get_ancestors(tree, timeout[0])
+    ancestors = get_ancestors(tree, element)
 
     parallel_branch = None
     parallel = None
@@ -122,7 +166,7 @@ def remove_timeout(tree, timeout):
             break
 
     if parallel_branch is None or parallel is None:
-        logger.warning("Could not find parallel_branch/parallel containing the timeout, returning original tree")
+        logger.warning("Could not find parallel_branch/parallel containing the element, returning original tree")
         return tree
 
     branches = [child for child in parallel if child.tag.endswith("parallel_branch")]
@@ -134,12 +178,16 @@ def remove_timeout(tree, timeout):
             parallel_parent.remove(parallel)
             for i, child in enumerate(list(remaining_branch)):
                 parallel_parent.insert(idx + i, child)
-            logger.info("Removed parallel gateway since only one branch was left after removing timeout branch")
+            logger.info("Removed parallel gateway since only one branch was left after removing branch")
         else:
             parallel.remove(parallel_branch)
-            logger.info("Removed timeout branch from parallel (parallel is root element)")
+            logger.info("Removed branch from parallel (parallel is root element)")
     else:
         parallel.remove(parallel_branch)
-        logger.info("Removed timeout branch from parallel gateway")
+        logger.info("Removed branch from parallel gateway")
 
     return tree
+
+def remove_timeout(tree, timeout):
+    '''Remove the parallel_branch containing the timeout from the tree.'''
+    return _remove_branch_containing(tree, timeout[0])
