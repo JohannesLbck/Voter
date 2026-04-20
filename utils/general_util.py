@@ -85,22 +85,28 @@ def transform_log(log, call_id = "local testing", cpee_instance = "local testing
     return event_log
 
 def add_start_end(tree):
-    new_first_sibling = ET.Element("{http://cpee.org/ns/description/1.0}start_activity")
-    new_first_sibling.text = "Inserted Start Activity"
+    ns = "http://cpee.org/ns/description/1.0"
+    start = ET.Element("{%s}call" % ns, attrib={"id": "start", "endpoint": ""})
+    start_params = ET.SubElement(start, "{%s}parameters" % ns)
+    start_label = ET.SubElement(start_params, "{%s}label" % ns)
+    start_label.text = "start_activity"
 
-    new_last_sibling = ET.Element("{http://cpee.org/ns/description/1.0}end_activity")
-    new_last_sibling.text = "Inserted End Activitiy"
-    
-    tree.insert(0, new_first_sibling)
+    end = ET.Element("{%s}call" % ns, attrib={"id": "end", "endpoint": ""})
+    end_params = ET.SubElement(end, "{%s}parameters" % ns)
+    end_label = ET.SubElement(end_params, "{%s}label" % ns)
+    end_label.text = "end_activity"
 
-    tree.append(new_last_sibling)
+    tree.insert(0, start)
+    tree.append(end)
     return tree
 
 def remove_start_end(tree):
     ns = "http://cpee.org/ns/description/1.0"
-    for tag in ["start_activity", "end_activity"]:
-        for elem in tree.findall("{%s}%s" % (ns, tag)):
-            tree.remove(elem)
+    for elem in list(tree):
+        if elem.tag == "{%s}call" % ns and elem.get("id") in ("start", "end"):
+            label = elem.find("{%s}parameters/{%s}label" % (ns, ns))
+            if label is not None and label.text in ("start_activity", "end_activity"):
+                tree.remove(elem)
     return tree
 
 
@@ -108,6 +114,7 @@ def remove_start_end(tree):
 def combine_sub_trees(tree):
     ns1 = {"ns0": "http://cpee.org/ns/description/1.0"}
     ns2 = {"": "http://cpee.org/ns/properties/2.0"}
+    combined = False
     
     # Iterate over the subprocess elements and replace them in the same loop
     for elem in tree.findall(".//ns0:call[@endpoint='subprocess']", ns1):
@@ -140,6 +147,7 @@ def combine_sub_trees(tree):
                                     parent.insert(target_index, child)
                                 # Remove the subprocess element after adding its children
                                 parent.remove(elem)
+                                combined = True
                                 logger.info("Subprocess replaced with its child elements successfully.")
                             break
                 else:
@@ -150,7 +158,7 @@ def combine_sub_trees(tree):
                 logger.warning(f"Unexpected error: {e}")
         else:
             logger.warning(f"Url of a subprocess is None")
-    return tree
+    return tree, combined
 
 def find_subprocess(tree):
     namespace = {"ns0": "http://cpee.org/ns/description/1.0"}

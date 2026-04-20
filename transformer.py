@@ -141,7 +141,7 @@ async def transform(request: Request):
         print(notification)
         xml = ET.fromstring(notification["content"]["description"])
         xml = add_start_end(xml)
-        xml= combine_sub_trees(xml)
+        xml= combine_sub_trees(xml)[0]
         typ3 = form["type"]
         topic = form["topic"]
         event = form["event"]

@@ -1,0 +1,409 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testset xmlns="http://cpee.org/ns/properties/2.0" xmlns:riddl="http://riddl.org/ns/common-patterns/notifications-producer/2.0">
+  <executionhandler>ruby</executionhandler>
+  <dataelements>
+    <amount>7</amount>
+    <counter>0</counter>
+    <exercise_points>0</exercise_points>
+  </dataelements>
+  <endpoints>
+    <timeout>https-post://cpee.org/services/timeout.php</timeout>
+    <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
+  </endpoints>
+  <attributes>
+    <guarded>none</guarded>
+    <info>Lin</info>
+    <modeltype>CPEE</modeltype>
+    <theme>extended</theme>
+    <guarded_id />
+    <creator>Christine Ashcreek</creator>
+    <author>Christine Ashcreek</author>
+    <model_uuid>ae5c34bd-9a8e-4aab-845d-f44a9d5e555d</model_uuid>
+    <model_version />
+    <design_stage>development</design_stage>
+    <design_dir>Staff.dir/Loebbi.dir/Voting.dir/DataSet.dir</design_dir>
+    <requirements>{"R1"=&gt;"max_time_between('upload exercise task', 'receive exercise submission', 604800)"}</requirements>
+  </attributes>
+  <description>
+    <description xmlns="http://cpee.org/ns/description/1.0">
+      <call id="a1" endpoint="">
+        <parameters>
+          <label>Kick-off meeting</label>
+          <method>:post</method>
+          <arguments />
+        </parameters>
+        <code>
+          <prepare />
+          <finalize output="result" />
+          <update output="result" />
+          <rescue output="result" />
+        </code>
+        <annotations>
+          <_generic />
+          <_timing>
+            <_timing_weight />
+            <_timing_avg />
+            <explanations />
+          </_timing>
+          <_shifting>
+            <_shifting_type>Duration</_shifting_type>
+          </_shifting>
+          <_context_data_analysis>
+            <probes />
+            <ips />
+          </_context_data_analysis>
+          <report>
+            <url />
+          </report>
+          <_notes>
+            <_notes_general />
+          </_notes>
+        </annotations>
+        <documentation>
+          <input />
+          <output />
+          <implementation>
+            <description xmlns="http://cpee.org/ns/description/1.0" />
+          </implementation>
+          <code>
+            <description xmlns="http://cpee.org/ns/description/1.0" />
+          </code>
+        </documentation>
+      </call>
+      <parallel wait="-1" cancel="last">
+        <parallel_branch>
+          <call id="a4" endpoint="subprocess">
+            <parameters>
+              <label>Milestones</label>
+              <method>:post</method>
+              <arguments>
+                <behavior>wait_running</behavior>
+                <url />
+                <init />
+                <endpoints />
+                <attributes />
+                <customization />
+              </arguments>
+            </parameters>
+            <code>
+              <prepare />
+              <finalize output="result">data.milestone_points = result.points</finalize>
+              <update output="result" />
+              <rescue output="result" />
+            </code>
+            <annotations>
+              <_generic />
+              <_timing>
+                <_timing_weight />
+                <_timing_avg />
+                <explanations />
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes />
+                <ips />
+              </_context_data_analysis>
+              <report>
+                <url />
+              </report>
+              <_notes>
+                <_notes_general />
+              </_notes>
+            </annotations>
+            <documentation>
+              <input />
+              <output />
+              <implementation>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </implementation>
+              <code>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </code>
+            </documentation>
+          </call>
+        </parallel_branch>
+        <parallel_branch>
+          <call id="a5" endpoint="subprocess">
+            <parameters>
+              <label>Lectures</label>
+              <method>:post</method>
+              <arguments>
+                <behavior>wait_running</behavior>
+                <url />
+                <init />
+                <endpoints />
+                <attributes />
+                <customization />
+              </arguments>
+            </parameters>
+            <code>
+              <prepare />
+              <finalize output="result">data.presentation_points = result.points</finalize>
+              <update output="result" />
+              <rescue output="result" />
+            </code>
+            <annotations>
+              <_generic />
+              <_timing>
+                <_timing_weight />
+                <_timing_avg />
+                <explanations />
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes />
+                <ips />
+              </_context_data_analysis>
+              <report>
+                <url />
+              </report>
+              <_notes>
+                <_notes_general />
+              </_notes>
+            </annotations>
+            <documentation>
+              <input />
+              <output />
+              <implementation>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </implementation>
+              <code>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </code>
+            </documentation>
+          </call>
+        </parallel_branch>
+        <parallel_branch>
+          <loop mode="pre_test" condition="counter &lt; amount">
+            <description xmlns="http://cpee.org/ns/description/1.0">
+              <call id="a1" endpoint="">
+                <parameters>
+                  <label>upload exercise task</label>
+                  <method>:post</method>
+                  <arguments />
+                </parameters>
+                <annotations>
+                  <_generic />
+                  <_timing>
+                    <_timing_weight />
+                    <_timing_avg />
+                    <explanations />
+                  </_timing>
+                  <_shifting>
+                    <_shifting_type>Duration</_shifting_type>
+                  </_shifting>
+                  <_context_data_analysis>
+                    <probes />
+                    <ips />
+                  </_context_data_analysis>
+                  <report>
+                    <url />
+                  </report>
+                  <_notes>
+                    <_notes_general />
+                  </_notes>
+                </annotations>
+                <documentation>
+                  <input />
+                  <output />
+                  <implementation>
+                    <description xmlns="http://cpee.org/ns/description/1.0" />
+                  </implementation>
+                </documentation>
+              </call>
+              <call id="a3" endpoint="">
+                <parameters>
+                  <label>receive exercise submission</label>
+                  <method>:post</method>
+                  <arguments />
+                </parameters>
+                <annotations>
+                  <_generic />
+                  <_timing>
+                    <_timing_weight />
+                    <_timing_avg />
+                    <explanations />
+                  </_timing>
+                  <_shifting>
+                    <_shifting_type>Duration</_shifting_type>
+                  </_shifting>
+                  <_context_data_analysis>
+                    <probes />
+                    <ips />
+                  </_context_data_analysis>
+                  <report>
+                    <url />
+                  </report>
+                  <_notes>
+                    <_notes_general />
+                  </_notes>
+                </annotations>
+                <documentation>
+                  <input />
+                  <output />
+                  <implementation>
+                    <description xmlns="http://cpee.org/ns/description/1.0" />
+                  </implementation>
+                </documentation>
+              </call>
+              <call id="a4" endpoint="">
+                <parameters>
+                  <label>evaluate presentation</label>
+                  <method>:post</method>
+                  <arguments />
+                </parameters>
+                <annotations>
+                  <_generic />
+                  <_timing>
+                    <_timing_weight />
+                    <_timing_avg />
+                    <explanations />
+                  </_timing>
+                  <_shifting>
+                    <_shifting_type>Duration</_shifting_type>
+                  </_shifting>
+                  <_context_data_analysis>
+                    <probes />
+                    <ips />
+                  </_context_data_analysis>
+                  <report>
+                    <url />
+                  </report>
+                  <_notes>
+                    <_notes_general />
+                  </_notes>
+                </annotations>
+                <documentation>
+                  <input />
+                  <output />
+                  <implementation>
+                    <description xmlns="http://cpee.org/ns/description/1.0" />
+                  </implementation>
+                </documentation>
+              </call>
+            </description>
+            <_probability>
+              <_probability_min />
+              <_probability_max />
+              <_probability_avg />
+            </_probability>
+          </loop>
+        </parallel_branch>
+      </parallel>
+      <choose mode="exclusive">
+        <alternative condition="data.milestone_points &gt; 29 &amp;&amp; data.presentation_points &gt; 19 &amp;&amp; data.exercise_points = amount">
+          <_probability>
+            <_probability_min />
+            <_probability_max />
+            <_probability_avg />
+          </_probability>
+          <call id="a2" endpoint="">
+            <parameters>
+              <label>Enrollment</label>
+              <method>:post</method>
+              <arguments />
+            </parameters>
+            <code>
+              <prepare />
+              <finalize output="result" />
+              <update output="result" />
+              <rescue output="result" />
+            </code>
+            <annotations>
+              <_generic />
+              <_timing>
+                <_timing_weight />
+                <_timing_avg />
+                <explanations />
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes />
+                <ips />
+              </_context_data_analysis>
+              <report>
+                <url />
+              </report>
+              <_notes>
+                <_notes_general />
+              </_notes>
+            </annotations>
+            <documentation>
+              <input />
+              <output />
+              <implementation>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </implementation>
+              <code>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </code>
+            </documentation>
+          </call>
+          <call id="a3" endpoint="">
+            <parameters>
+              <label>Exam</label>
+              <method>:post</method>
+              <arguments />
+            </parameters>
+            <code>
+              <prepare />
+              <finalize output="result" />
+              <update output="result" />
+              <rescue output="result" />
+            </code>
+            <annotations>
+              <_generic />
+              <_timing>
+                <_timing_weight />
+                <_timing_avg />
+                <explanations />
+              </_timing>
+              <_shifting>
+                <_shifting_type>Duration</_shifting_type>
+              </_shifting>
+              <_context_data_analysis>
+                <probes />
+                <ips />
+              </_context_data_analysis>
+              <report>
+                <url />
+              </report>
+              <_notes>
+                <_notes_general />
+              </_notes>
+            </annotations>
+            <documentation>
+              <input />
+              <output />
+              <implementation>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </implementation>
+              <code>
+                <description xmlns="http://cpee.org/ns/description/1.0" />
+              </code>
+            </documentation>
+          </call>
+        </alternative>
+        <otherwise />
+      </choose>
+    </description>
+  </description>
+  <transformation>
+    <description type="copy" />
+    <dataelements type="none" />
+    <endpoints type="none" />
+  </transformation>
+  <riddl:subscriptions>
+    <riddl:subscription id="_compliance" url="https://power.bpm.cit.tum.de/compliance/Subscriber">
+      <riddl:topic id="description">
+        <riddl:event>change</riddl:event>
+      </riddl:topic>
+    </riddl:subscription>
+  </riddl:subscriptions>
+</testset>

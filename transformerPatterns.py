@@ -34,7 +34,7 @@ def recurring(tree, a, b, t):
     if a_ele is not None:
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
-        b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
+        b_endpoint_key = b_endpoint_key if b_endpoint_key != "" else b
         loops = tree.findall(".//ns0:loop", namespace)
         modified_tree = recurring_modify(tree, a_ele, b_ele, t) # Creates the modified tree here
         return modified_tree, {"CallerID" : a_ele.get("id"),
@@ -54,7 +54,7 @@ def maxExecTime(tree, a, b, time):
         a_id = a_ele.get("id")
         b_ele = exists_by_label(tree, b)
         b_endpoint_key = b_ele.get("endpoint") if b_ele is not None else b
-        b_endpoint_key = b_endpoint_key if b_endpoint_key is not "" else b
+        b_endpoint_key = b_endpoint_key if b_endpoint_key != "" else b
         modified_tree = max_exec_time_modify(tree, a_ele, b_ele, time) # Creates the modified tree here
         return modified_tree, {"CallerID" : a_id,
                     "Phase": "before",
@@ -73,7 +73,7 @@ def max_time_between(tree, a, b, time, c = None):
         if bpath is not None:
             c_path = exists_by_label(tree, c)
             c_endpoint_key = c_path.get("endpoint") if c_path is not None else c
-            c_endpoint_key = c_endpoint_key if c_endpoint_key is not "" else c
+            c_endpoint_key = c_endpoint_key if c_endpoint_key != "" else c
             modified_tree = max_time_between_modify(tree, apath, bpath, c_path, time) # Creates the modified tree here
             return modified_tree, {"CallerID" : apath.get("id"),
                     "Phase": "before",
@@ -105,7 +105,7 @@ def wait_for_event_between(tree, a, b, event):
             else:
                 c_path = exists_by_label(tree, event)
                 c_endpoint_key = c_path.get("endpoint") if c_path is not None else event
-                c_endpoint_key = c_endpoint_key if c_endpoint_key is not "" else event
+                c_endpoint_key = c_endpoint_key if c_endpoint_key != "" else event
                 modified_tree = wait_for_event_modify(tree, apath, bpath, c_path) # Creates the modified tree here
                 return modified_tree, {"CallerID" : apath.get("id"),
                     "Phase": "before",
@@ -171,7 +171,7 @@ def leads_to_helper(tree, a, b):
 
 
 
-def executed_by(args):
+def executed_by(tree, a, resource):
     return tree, None
 
 # These are just left empty to keep compatability with the full ASTs
