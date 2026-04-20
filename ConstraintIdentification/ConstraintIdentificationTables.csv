@@ -1,0 +1,7 @@
+Pattern,Percentage,Mapping
+througout (continuous),,-> Recurring
+recurring,,-> Recurring
+max execution time,,-> Max Exec Time
+max time between,,-> Max time between
+min time between,,-> Wait for event between
+min execution time,,-> Min Exec Time

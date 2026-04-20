@@ -120,7 +120,7 @@ def process_file(process_file):
         ET.indent(combined_root)
         combined_bytes = ET.tostring(combined_root, encoding='UTF-8', xml_declaration=True)
         combined_bytes = _fix_description_ns(combined_bytes)
-        combined_file = f"Outputs/{os.path.splitext(os.path.basename(process_file))[0]}_combined_{int(time.time())}.xml"
+        combined_file = f"Outputs/modified_{os.path.basename(process_file)}_combined_{int(time.time())}.xml"
         with open(combined_file, 'wb') as f:
             f.write(combined_bytes)
         print(f"  Combined tree written to: {combined_file}")
