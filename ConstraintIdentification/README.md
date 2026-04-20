@@ -1,7 +1,7 @@
 # Constraint Identification
 
 This folder documents the temporal constraint identification case study from the blood guide. Full text blood guide in pdf can not be provided for copyright protection but can be found
-on the official website of the EDQM. The full list of terms used for identification can be checked in the pdfsearcher.py script.
+on the official website of the [EDQM](https://www.edqm.eu/en/blood-guide). The full list of terms used for identification can be checked in the pdfsearcher.py script.
 
 ## Files
 

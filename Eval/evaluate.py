@@ -11,7 +11,7 @@ import sys
 import glob
 import xml.etree.ElementTree as ET
 import math
-from collections import Counter
+from collections import Counter, defaultdict, deque
 
 # ── Namespaces ──────────────────────────────────────────────────────────
 NS = "http://cpee.org/ns/description/1.0"
@@ -26,6 +26,10 @@ STRUCTURAL_TAGS = {
 
 # Tags that are control-flow connectors (gateways / routing constructs)
 CONNECTOR_TAGS = {"parallel", "choose", "loop"}
+
+SEQUENCE_WRAPPER_TAGS = {"description", "parallel_branch", "alternative", "otherwise"}
+ACTIVITY_TAGS = {"call", "terminate", "stop"}
+CONNECTOR_TYPES = {"AND", "XOR", "OR"}
 
 
 # ── Helper: extract the inner process-tree element ──────────────────────
@@ -54,126 +58,481 @@ def _structural_children(elem):
             yield child
 
 
-# ── Metric placeholders ────────────────────────────────────────────────
-
-def size(tree):
-    """M1 – Size: total number of structural nodes in the tree."""
-    count = 0
-    stack = [tree]
-    while stack:
-        node = stack.pop()
-        if _strip_ns(node.tag) in STRUCTURAL_TAGS or _strip_ns(node.tag) in CONNECTOR_TAGS:
-            count += 1
-            stack.extend(_structural_children(node))
-    return count
+def _choose_type(elem):
+    """Map CPEE choose mode to EPC-style connector type."""
+    mode = (elem.attrib.get("mode") or "").strip().lower()
+    if mode in {"inclusive", "or"}:
+        return "OR"
+    # Default to XOR for exclusive or unspecified choose nodes.
+    return "XOR"
 
 
-def diameter(tree):
-    """M2 – Diameter: length of the longest root-to-leaf path
-    (counted in edges between structural nodes)."""
-
-    def _longest(node, depth):
-        children = list(_structural_children(node))
-        if not children:
-            return depth
-        return max(_longest(c, depth + 1) for c in children)
-
-    return _longest(tree, 0)
+def _max_nesting_depth(elem):
+    """Maximum nesting depth of structured blocks (parallel/choose/loop)."""
+    tag = _strip_ns(elem.tag)
+    child_depths = [_max_nesting_depth(c) for c in _structural_children(elem)]
+    best_child = max(child_depths) if child_depths else 0
+    if tag in CONNECTOR_TAGS:
+        return 1 + best_child
+    return best_child
 
 
-def separability(tree):
-    """M3 – Separability: number of cut-vertices / Size.
+def _build_flow_graph(tree):
+    """Build a directed flow graph from the structured CPEE tree.
 
-    A cut-vertex is a structural node whose removal would disconnect the
-    tree into two or more components.
-
-    TODO: implement cut-vertex detection; returning placeholder 0.0.
+    Returns a dict with nodes/edges and connector metadata. Connector metadata
+    uses EPC-style AND/XOR/OR types with explicit split/join roles.
     """
-    n = size(tree)
-    if n == 0:
-        return 0.0
-    cut_vertices = 0  # TODO: compute actual cut-vertices
-    return cut_vertices / n
+    next_id = [0]
+    nodes = set()
+    edges = set()
+    node_meta = {}
+    connector_roles = {}
 
+    def add_node(kind, connector_type=None, role=None):
+        next_id[0] += 1
+        nid = f"n{next_id[0]}"
+        nodes.add(nid)
+        node_meta[nid] = {
+            "kind": kind,
+            "connector_type": connector_type,
+            "role": role,
+        }
+        if connector_type in CONNECTOR_TYPES and role in {"split", "join"}:
+            connector_roles[nid] = (connector_type, role)
+        return nid
 
-def concurrency(tree):
-    """M4 – Concurrency (token-split-sum): sum over every parallel
-    gateway of (number_of_branches − 1), which equals the extra tokens
-    introduced at that split.
+    def add_edge(src, dst):
+        if src is not None and dst is not None:
+            edges.add((src, dst))
 
-    TODO: verify semantics; currently counts parallel_branch children of
-    each <parallel> element.
-    """
-    total = 0
-    stack = [tree]
-    while stack:
-        node = stack.pop()
-        tag = _strip_ns(node.tag)
+    def connect_all(from_nodes, to_nodes):
+        for src in from_nodes:
+            for dst in to_nodes:
+                add_edge(src, dst)
+
+    def build_sequence(elements):
+        entries = set()
+        prev_exits = None
+        for child in elements:
+            tag = _strip_ns(child.tag)
+            if tag not in STRUCTURAL_TAGS:
+                continue
+            child_entries, child_exits = build_elem(child)
+            if not child_entries and not child_exits:
+                continue
+            if not entries:
+                entries = set(child_entries)
+            if prev_exits is not None:
+                connect_all(prev_exits, child_entries)
+            prev_exits = set(child_exits)
+        if not entries:
+            return set(), set()
+        return entries, (prev_exits if prev_exits is not None else set())
+
+    def branch_content(branch_elem):
+        return [c for c in branch_elem if _strip_ns(c.tag) in STRUCTURAL_TAGS]
+
+    def build_elem(elem):
+        tag = _strip_ns(elem.tag)
+
+        if tag in ACTIVITY_TAGS:
+            nid = add_node("activity")
+            return {nid}, {nid}
+
+        if tag in SEQUENCE_WRAPPER_TAGS:
+            return build_sequence(branch_content(elem))
+
         if tag == "parallel":
-            branches = [c for c in node if _strip_ns(c.tag) == "parallel_branch"]
-            if branches:
-                total += len(branches) - 1
-        if tag in STRUCTURAL_TAGS:
-            stack.extend(_structural_children(node))
-    return total
+            split = add_node("connector", connector_type="AND", role="split")
+            join = add_node("connector", connector_type="AND", role="join")
+
+            branches = [c for c in elem if _strip_ns(c.tag) == "parallel_branch"]
+            if not branches:
+                add_edge(split, join)
+                return {split}, {join}
+
+            for br in branches:
+                b_entries, b_exits = build_sequence(branch_content(br))
+                if b_entries:
+                    connect_all({split}, b_entries)
+                    connect_all(b_exits, {join})
+                else:
+                    add_edge(split, join)
+
+            return {split}, {join}
+
+        if tag == "choose":
+            ctype = _choose_type(elem)
+            split = add_node("connector", connector_type=ctype, role="split")
+            join = add_node("connector", connector_type=ctype, role="join")
+
+            branches = [
+                c for c in elem
+                if _strip_ns(c.tag) in {"alternative", "otherwise"}
+            ]
+            if not branches:
+                add_edge(split, join)
+                return {split}, {join}
+
+            for br in branches:
+                b_entries, b_exits = build_sequence(branch_content(br))
+                if b_entries:
+                    connect_all({split}, b_entries)
+                    connect_all(b_exits, {join})
+                else:
+                    add_edge(split, join)
+
+            return {split}, {join}
+
+        if tag == "loop":
+            # Model loop semantics as decision + explicit back-edge.
+            decision = add_node("loop_decision")
+            after_loop = add_node("loop_exit")
+            add_edge(decision, after_loop)  # condition false path
+
+            body_entries, body_exits = build_sequence(branch_content(elem))
+            if body_entries:
+                connect_all({decision}, body_entries)
+                connect_all(body_exits, {decision})
+
+            return {decision}, {after_loop}
+
+        return set(), set()
+
+    root_children = [c for c in tree if _strip_ns(c.tag) in STRUCTURAL_TAGS]
+    build_sequence(root_children)
+
+    out_adj = defaultdict(set)
+    in_adj = defaultdict(set)
+    for src, dst in edges:
+        out_adj[src].add(dst)
+        in_adj[dst].add(src)
+
+    # Ensure every node appears in adjacency maps.
+    for nid in nodes:
+        out_adj[nid]
+        in_adj[nid]
+
+    connector_data = []
+    connector_nodes = set()
+    for nid, (ctype, role) in connector_roles.items():
+        degree = len(out_adj[nid]) if role == "split" else len(in_adj[nid])
+        connector_data.append(
+            {
+                "id": nid,
+                "type": ctype,
+                "role": role,
+                "degree": degree,
+            }
+        )
+        connector_nodes.add(nid)
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "out_adj": out_adj,
+        "in_adj": in_adj,
+        "node_meta": node_meta,
+        "connector_data": connector_data,
+        "connector_nodes": connector_nodes,
+        "non_connector_nodes": nodes - connector_nodes,
+    }
 
 
-def cyclicity(tree):
-    """M5 – Cyclicity: number of <loop> elements in the tree."""
-    count = 0
-    stack = [tree]
-    while stack:
-        node = stack.pop()
-        if _strip_ns(node.tag) == "loop":
-            count += 1
-        if _strip_ns(node.tag) in STRUCTURAL_TAGS:
-            stack.extend(_structural_children(node))
-    return count
+def _count_cut_vertices(graph):
+    """Count articulation points on the undirected projection of the graph."""
+    nodes = list(graph["nodes"])
+    if len(nodes) < 3:
+        return 0
+
+    undirected = defaultdict(set)
+    for src, dst in graph["edges"]:
+        undirected[src].add(dst)
+        undirected[dst].add(src)
+    for nid in graph["nodes"]:
+        undirected[nid]
+
+    def reachable_without(removed):
+        remaining = set(graph["nodes"]) - {removed}
+        if not remaining:
+            return set()
+        start = next(iter(remaining))
+        seen = {start}
+        q = deque([start])
+        while q:
+            cur = q.popleft()
+            for nxt in undirected[cur]:
+                if nxt == removed or nxt in seen:
+                    continue
+                seen.add(nxt)
+                q.append(nxt)
+        return seen
+
+    cut_count = 0
+    full_nodes = set(graph["nodes"])
+    for nid in nodes:
+        remaining = full_nodes - {nid}
+        if len(remaining) < 2:
+            continue
+        if reachable_without(nid) != remaining:
+            cut_count += 1
+    return cut_count
 
 
-def heterogeneity(tree):
-    """M6 – Heterogeneity: Shannon entropy of connector-type
-    distribution (parallel, choose, loop).
+def _nodes_on_directed_cycles(graph):
+    """Return set of nodes that belong to at least one directed cycle."""
+    out_adj = graph["out_adj"]
+    in_adj = graph["in_adj"]
+    all_nodes = set(graph["nodes"])
 
-    Entropy H = − Σ p_i · log2(p_i) over the connector types.
+    visited = set()
+    order = []
+
+    def dfs1(start):
+        stack = [(start, False)]
+        while stack:
+            node, expanded = stack.pop()
+            if expanded:
+                order.append(node)
+                continue
+            if node in visited:
+                continue
+            visited.add(node)
+            stack.append((node, True))
+            for nxt in out_adj[node]:
+                if nxt not in visited:
+                    stack.append((nxt, False))
+
+    for nid in all_nodes:
+        if nid not in visited:
+            dfs1(nid)
+
+    visited.clear()
+    cycle_nodes = set()
+
+    for nid in reversed(order):
+        if nid in visited:
+            continue
+        comp = set()
+        stack = [nid]
+        visited.add(nid)
+        while stack:
+            cur = stack.pop()
+            comp.add(cur)
+            for prev in in_adj[cur]:
+                if prev not in visited:
+                    visited.add(prev)
+                    stack.append(prev)
+
+        if len(comp) > 1:
+            cycle_nodes.update(comp)
+        else:
+            only = next(iter(comp))
+            if only in out_adj[only]:
+                cycle_nodes.add(only)
+
+    return cycle_nodes
+
+
+def _longest_simple_path_length(graph):
+    """Return length (in edges) of the longest simple directed path.
+
+    Notes:
+    - A model with cycles can have infinitely long non-simple paths.
+    - This metric therefore uses simple paths (no node repeats), which
+      is finite and aligns with a practical notion of longest possible path.
     """
-    counts = Counter()
-    stack = [tree]
-    while stack:
-        node = stack.pop()
-        tag = _strip_ns(node.tag)
-        if tag in CONNECTOR_TAGS:
-            counts[tag] += 1
-        if tag in STRUCTURAL_TAGS:
-            stack.extend(_structural_children(node))
+    out_adj = graph["out_adj"]
+    nodes = list(graph["nodes"])
+    best = 0
 
+    def dfs(node, visited, length):
+        nonlocal best
+        if length > best:
+            best = length
+        for nxt in out_adj[node]:
+            if nxt in visited:
+                continue
+            visited.add(nxt)
+            dfs(nxt, visited, length + 1)
+            visited.remove(nxt)
+
+    for start in nodes:
+        dfs(start, {start}, 0)
+
+    return best
+
+
+# ── Metrics aligned to formal definitions ──────────────────────────────
+
+def size(analysis):
+    """|N|: number of graph nodes (activities + connector instances)."""
+    return len(analysis["nodes"])
+
+
+def diameter(analysis):
+    """Diameter: longest possible simple directed path (edge count)."""
+    return _longest_simple_path_length(analysis)
+
+
+def avg_connector_degree(analysis):
+    """dC: average connector degree over AND/XOR/OR connector instances."""
+    connectors = analysis["connector_data"]
+    if not connectors:
+        return 0.0
+    return sum(c["degree"] for c in connectors) / len(connectors)
+
+
+def max_connector_degree(analysis):
+    """d^C: maximum connector degree over AND/XOR/OR connector instances."""
+    connectors = analysis["connector_data"]
+    if not connectors:
+        return 0
+    return max(c["degree"] for c in connectors)
+
+
+def separability(analysis):
+    """Π(G) = |cut-vertices| / (|N| - 2)."""
+    n = len(analysis["nodes"])
+    if n <= 2:
+        return 0.0
+    cut_vertices = _count_cut_vertices(analysis)
+    return cut_vertices / (n - 2)
+
+
+def sequentiality(analysis):
+    """Ξ(G): share of arcs between non-connector nodes."""
+    edges = analysis["edges"]
+    if not edges:
+        return 0.0
+    non_connectors = analysis["non_connector_nodes"]
+    seq_arcs = sum(1 for src, dst in edges if src in non_connectors and dst in non_connectors)
+    return seq_arcs / len(edges)
+
+
+def depth(tree):
+    """Λ: maximum nesting depth of structured blocks."""
+    return _max_nesting_depth(tree)
+
+
+def mismatch(analysis):
+    """MM(G): type-wise split/join degree mismatch summed over AND/XOR/OR."""
+    by_type = {
+        "AND": {"split": 0, "join": 0},
+        "XOR": {"split": 0, "join": 0},
+        "OR": {"split": 0, "join": 0},
+    }
+    for c in analysis["connector_data"]:
+        by_type[c["type"]][c["role"]] += c["degree"]
+    return sum(abs(v["split"] - v["join"]) for v in by_type.values())
+
+
+def heterogeneity(analysis):
+    """CH(G): entropy over AND/XOR/OR connectors using log base 3."""
+    counts = Counter(c["type"] for c in analysis["connector_data"])
     total = sum(counts.values())
     if total == 0:
         return 0.0
 
     entropy = 0.0
+    log3 = math.log(3)
     for c in counts.values():
         p = c / total
         if p > 0:
-            entropy -= p * math.log2(p)
+            entropy -= p * (math.log(p) / log3)
     return entropy
+
+
+def cyclicity(analysis):
+    """CYCN(G): fraction of nodes that belong to directed cycles."""
+    n = len(analysis["nodes"])
+    if n == 0:
+        return 0.0
+    cycle_nodes = _nodes_on_directed_cycles(analysis)
+    return len(cycle_nodes) / n
+
+
+def token_splits(analysis):
+    """TS(G): extra tokens introduced by AND/OR split connectors."""
+    total = 0
+    for c in analysis["connector_data"]:
+        if c["role"] == "split" and c["type"] in {"AND", "OR"}:
+            total += max(c["degree"] - 1, 0)
+    return total
+
+
+def control_flow_complexity(analysis):
+    """CFC(G) according to split connector weighting."""
+    total = 0
+    for c in analysis["connector_data"]:
+        if c["role"] != "split":
+            continue
+        d = c["degree"]
+        if c["type"] == "AND":
+            total += 1
+        elif c["type"] == "XOR":
+            total += d
+        elif c["type"] == "OR":
+            total += (2 ** d) - 1
+    return total
+
+
+def join_complexity(analysis):
+    """JC(G) according to join connector weighting."""
+    total = 0
+    for c in analysis["connector_data"]:
+        if c["role"] != "join":
+            continue
+        d = c["degree"]
+        if c["type"] == "AND":
+            total += 1
+        elif c["type"] == "XOR":
+            total += d
+        elif c["type"] == "OR":
+            total += (2 ** d) - 1
+    return total
+
+
 
 
 # ── All metrics in one pass ────────────────────────────────────────────
 
-METRICS = [
-    ("Size (#Nodes)",            size),
+FULLMETRICS = [
+    ("Size |N|",                 size),
     ("Diameter (Longest Path)",  diameter),
-    ("Separability",             separability),
-    ("Concurrency (Token Split)",concurrency),
-    ("Cyclicity (#Loops)",       cyclicity),
-    ("Heterogeneity (Entropy)",  heterogeneity),
+    ("Avg. Connector Degree dC", avg_connector_degree),
+    ("Max. Connector Degree d^C", max_connector_degree),
+    ("Separability Pi",          separability),
+    ("Sequentiality Xi",         sequentiality),
+    ("Depth Lambda",             depth),
+    ("Mismatch MM",              mismatch),
+    ("Heterogeneity CH",         heterogeneity),
+    ("Cyclicity CYCN",           cyclicity),
+    ("Token Splits TS",          token_splits),
+    ("Control Flow Complexity CFC", control_flow_complexity),
+    ("Join Complexity JC",       join_complexity),
+]
+
+METRICS = [
+    ("Size |N|",                 size),
+    ("Diameter (Longest Path)",  diameter),
+    ("Separability Pi",          separability),
+    ("Sequentiality Xi",         sequentiality),
+    ("Heterogeneity CH",         heterogeneity),
+    ("Cyclicity CYCN",           cyclicity),
+    ("Control Flow Complexity CFC", control_flow_complexity),
+    ("Join Complexity JC",       join_complexity),
 ]
 
 
 def compute_metrics(tree):
     """Return an ordered dict of metric-name → value for *tree*."""
-    return {name: fn(tree) for name, fn in METRICS}
+    analysis = _build_flow_graph(tree)
+    return {
+        name: (fn(tree) if name == "Depth Lambda" else fn(analysis))
+        for name, fn in METRICS
+    }
 
 
 # ── Matching outputs to an input ───────────────────────────────────────
