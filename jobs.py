@@ -1,14 +1,63 @@
 import json
 import logging
+import time
 import requests
 from patterns import MaxExecTime, Recurring, WaitForEvent
 
 logger = logging.getLogger(__name__)
 
 SUBPROCESS_URL = "https://cpee.org/flow/start/xml/"
+ENGINE_URL = "https://cpee.org/flow/engine"
 
 
 class Jobs:
+
+    def _abandon_instance(self, target, pattern_name):
+        """Transition subprocess instance towards abandoned state.
+
+        Behavior follows the Ruby snippet semantics:
+        - if current state is "stopping": write "stopping"
+        - if current state is "ready" or "stopped": write "abandoned"
+
+        Additionally, if state is "running" we first request "stopping"
+        so a later callback can abandon it.
+        """
+        if not target:
+            logger.warning(f'No target instance id for {pattern_name} abandon job')
+            return
+
+        state_url = f"{ENGINE_URL}/{target}/properties/state/"
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        try:
+            response = requests.get(state_url)
+            if response.status_code != 200:
+                logger.error(f'Failed to read state for {pattern_name} instance {target}: {response.status_code} {response.text}')
+                return
+
+            state = response.text.strip()
+            logger.info(f'{pattern_name} instance {target} current state: {state}')
+
+            if state in {"running", "stopping"}:
+                put_response = requests.put(state_url, headers=headers, data="value=stopping")
+                if put_response.status_code >= 400:
+                    logger.error(f'Failed to set stopping for {pattern_name} instance {target}: {put_response.status_code} {put_response.text}')
+                else:
+                    logger.info(f'Set {pattern_name} instance {target} to stopping')
+                    put_respone_2 = requests.put(state_url, headers=headers, data="value=abandoned")
+                    if put_respone_2.status_code >= 400:
+                        logger.error(f'Failed to abandon {pattern_name} instance {target} after stopping: {put_respone_2.status_code} {put_respone_2.text}')
+                    else:
+                        logger.info(f'Abandoned {pattern_name} instance {target} after stopping')
+            elif state in {"ready", "stopped"}:
+                put_response = requests.put(state_url, headers=headers, data="value=abandoned")
+                if put_response.status_code >= 400:
+                    logger.error(f'Failed to abandon {pattern_name} instance {target}: {put_response.status_code} {put_response.text}')
+                else:
+                    logger.info(f'Abandoned {pattern_name} instance {target}')
+            else:
+                logger.info(f'No state transition needed for {pattern_name} instance {target} in state: {state}')
+        except Exception as e:
+            logger.error(f'Failed to abandon {pattern_name} instance {target}: {e}')
 
     # --- vote_syncing_before jobs ---
 
@@ -69,44 +118,62 @@ class Jobs:
     def abandon_max_exec_time(self, job, callback):
         """Abandon instance of a max exec time pattern."""
         logger.info(f'Abandon max exec time instance: {job}')
-        # TODO: implement abandon max exec time instance
-        pass
+        self._abandon_instance(job.get("target"), "max exec time")
 
     def abandon_recurring(self, job, callback):
         """Abandon instance of a recurring pattern."""
         logger.info(f'Abandon recurring instance: {job}')
-        # TODO: implement abandon recurring instance
-        pass
+        self._abandon_instance(job.get("target"), "recurring")
+
+    def abandon_wait_for_event(self, job, callback):
+        """Abandon instance of a wait for event pattern."""
+        logger.info(f'Abandon wait for event instance: {job}')
+        self._abandon_instance(job.get("target"), "wait for event")
+
+    def abandon_wait_for_timeout(self, job, callback):
+        """Abandon instance of a wait for timeout pattern."""
+        logger.info(f'Abandon wait for timeout instance: {job}')
+        self._abandon_instance(job.get("target"), "wait for timeout")
 
     def check_wait_for_event(self, job, callback):
-        """Check if the wait for event instance is finished."""
+        """Actively wait until the wait-for-event instance is finished."""
         logger.info(f'Check wait for event instance: {job}')
         target = job.get("target")
-        try:
-            response = requests.get(f"https://cpee.org/flow/engine/{target}/properties/state/")
-            state = response.text.strip()
-            logger.info(f'Wait for event instance {target} state: {state}')
-            if state == "finished":
-                logger.info(f'Wait for event instance {target} finished successfully')
-            else:
-                logger.warning(f'Wait for event instance {target} not finished yet, state: {state}')
-        except Exception as e:
-            logger.error(f'Failed to check wait for event instance {target}: {e}')
+        state_url = f"https://cpee.org/flow/engine/{target}/properties/state/"
+        while True:
+            try:
+                response = requests.get(state_url)
+                state = response.text.strip()
+                logger.info(f'Wait for event instance {target} state: {state}')
+                if state == "finished":
+                    logger.info(f'Wait for event instance {target} finished successfully')
+                    self._abandon_instance(target, "wait for event")
+                    return None
+                logger.info(f'Wait for event instance {target} not finished yet, checking again in 5 seconds')
+            except Exception as e:
+                logger.error(f'Failed to check wait for event instance {target}: {e}')
+                logger.info('Retrying wait-for-event check in 5 seconds')
+            time.sleep(5)
 
     def check_wait_for_timeout(self, job, callback):
-        """Check if the wait for timeout instance is finished."""
+        """Actively wait until the wait-for-timeout instance is finished."""
         logger.info(f'Check wait for timeout instance: {job}')
         target = job.get("target")
-        try:
-            response = requests.get(f"https://cpee.org/flow/engine/{target}/properties/state/")
-            state = response.text.strip()
-            logger.info(f'Wait for timeout instance {target} state: {state}')
-            if state == "finished":
-                logger.info(f'Wait for timeout instance {target} finished successfully')
-            else:
-                logger.warning(f'Wait for timeout instance {target} not finished yet, state: {state}')
-        except Exception as e:
-            logger.error(f'Failed to check wait for timeout instance {target}: {e}')
+        state_url = f"https://cpee.org/flow/engine/{target}/properties/state/"
+        while True:
+            try:
+                response = requests.get(state_url)
+                state = response.text.strip()
+                logger.info(f'Wait for timeout instance {target} state: {state}')
+                if state == "finished":
+                    logger.info(f'Wait for timeout instance {target} finished successfully')
+                    self._abandon_instance(target, "wait for timeout")
+                    return None
+                logger.info(f'Wait for timeout instance {target} not finished yet, checking again in 5 seconds')
+            except Exception as e:
+                logger.error(f'Failed to check wait for timeout instance {target}: {e}')
+                logger.info('Retrying wait-for-timeout check in 5 seconds')
+            time.sleep(5)
 
     # --- dispatch ---
 
@@ -122,6 +189,8 @@ class Jobs:
     AFTER_DISPATCH = {
         "abandon_max_exec_time": "abandon_max_exec_time",
         "abandon_recurring": "abandon_recurring",
+        "abandon_wait_for_event": "abandon_wait_for_event",
+        "abandon_wait_for_timeout": "abandon_wait_for_timeout",
     }
 
     def handle_jobs(self, jobs, phase, callback):

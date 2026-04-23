@@ -17,7 +17,7 @@
     <model_version/>
     <design_stage>development</design_stage>
     <design_dir>Staff.dir/Loebbi.dir/Voting.dir/DataSet.dir</design_dir>
-    <requirements>{}</requirements>
+    <requirements>{"R1":"recurring('check for new document in DMS', '10518984 ')"} </requirements>
   </attributes>
   <description>
     <description xmlns="http://cpee.org/ns/description/1.0">

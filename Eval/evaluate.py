@@ -11,6 +11,9 @@ import sys
 import glob
 import xml.etree.ElementTree as ET
 import math
+import re
+import shutil
+import subprocess
 from collections import Counter, defaultdict, deque
 
 # ── Namespaces ──────────────────────────────────────────────────────────
@@ -535,6 +538,80 @@ def compute_metrics(tree):
     }
 
 
+def _safe_slug(text):
+    """Convert arbitrary text to a filesystem-safe slug."""
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", text.strip())
+    return slug.strip("_") or "graph"
+
+
+def export_flow_graph(tree, label, output_dir):
+    """Export directed flow graph visualization as DOT and optional PNG.
+
+    DOT is always written. If Graphviz 'dot' is available on PATH,
+    a PNG is rendered next to the DOT file.
+    """
+    analysis = _build_flow_graph(tree)
+    node_meta = analysis["node_meta"]
+    edges = sorted(analysis["edges"])
+
+    os.makedirs(output_dir, exist_ok=True)
+    base_name = _safe_slug(label)
+    dot_path = os.path.join(output_dir, f"{base_name}.dot")
+    png_path = os.path.join(output_dir, f"{base_name}.png")
+
+    def _dot_node_attrs(nid):
+        meta = node_meta.get(nid, {})
+        kind = meta.get("kind")
+        ctype = meta.get("connector_type")
+        role = meta.get("role")
+
+        if kind == "activity":
+            return 'shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"'
+        if kind == "loop_decision":
+            return 'shape=diamond, style="filled", fillcolor="#fff4cc", label="LOOP?"'
+        if kind == "loop_exit":
+            return 'shape=circle, style="filled", fillcolor="#f2f2f2", label="EXIT"'
+        if kind == "connector":
+            txt = ctype if ctype else "CONN"
+            if role:
+                txt = f"{txt}\\n{role}"
+            return f'shape=diamond, style="filled", fillcolor="#fce5cd", label="{txt}"'
+        return 'shape=ellipse, label="NODE"'
+
+    lines = []
+    lines.append("digraph FlowGraph {")
+    lines.append('  rankdir=LR;')
+    lines.append('  graph [fontsize=10, fontname="Helvetica"];')
+    lines.append('  node [fontsize=10, fontname="Helvetica"];')
+    lines.append('  edge [fontsize=9, fontname="Helvetica"];')
+
+    for nid in sorted(analysis["nodes"]):
+        lines.append(f'  "{nid}" [{_dot_node_attrs(nid)}];')
+
+    for src, dst in edges:
+        lines.append(f'  "{src}" -> "{dst}";')
+
+    lines.append("}")
+
+    with open(dot_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+    rendered_png = False
+    if shutil.which("dot"):
+        try:
+            subprocess.run(
+                ["dot", "-Tpng", dot_path, "-o", png_path],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            rendered_png = True
+        except Exception:
+            rendered_png = False
+
+    return dot_path, (png_path if rendered_png else None)
+
+
 # ── Matching outputs to an input ───────────────────────────────────────
 
 def find_output_files(input_basename, outputs_dir):
@@ -575,6 +652,7 @@ def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     inputs_dir = os.path.join(base_dir, "Inputs")
     outputs_dir = os.path.join(base_dir, "Outputs")
+    vis_dir = os.path.join(base_dir, "Eval", "flow_graphs")
 
     # If a specific input file is given as argument, use it; otherwise
     # evaluate all files in Inputs/
@@ -601,6 +679,14 @@ def main():
 
         rows = []
         rows.append(("ORIGINAL", compute_metrics(input_tree)))
+        dot_path, png_path = export_flow_graph(
+            input_tree,
+            f"{input_basename}__ORIGINAL",
+            vis_dir,
+        )
+        print(f"  [GRAPH] {dot_path}")
+        if png_path:
+            print(f"  [GRAPH] {png_path}")
 
         output_files = find_output_files(input_basename, outputs_dir)
         if not output_files:
@@ -610,6 +696,14 @@ def main():
             try:
                 out_tree = get_process_tree(out_path)
                 rows.append((out_name, compute_metrics(out_tree)))
+                dot_path, png_path = export_flow_graph(
+                    out_tree,
+                    f"{input_basename}__{out_name}",
+                    vis_dir,
+                )
+                print(f"  [GRAPH] {dot_path}")
+                if png_path:
+                    print(f"  [GRAPH] {png_path}")
             except Exception as e:
                 print(f"  [ERROR] {out_name}: {e}")
 

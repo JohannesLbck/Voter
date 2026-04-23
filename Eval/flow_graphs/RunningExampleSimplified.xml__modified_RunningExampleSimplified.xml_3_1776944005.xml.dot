@@ -1,0 +1,22 @@
+digraph FlowGraph {
+  rankdir=LR;
+  graph [fontsize=10, fontname="Helvetica"];
+  node [fontsize=10, fontname="Helvetica"];
+  edge [fontsize=9, fontname="Helvetica"];
+  "n1" [shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"];
+  "n2" [shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"];
+  "n3" [shape=diamond, style="filled", fillcolor="#fce5cd", label="XOR\nsplit"];
+  "n4" [shape=diamond, style="filled", fillcolor="#fce5cd", label="XOR\njoin"];
+  "n5" [shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"];
+  "n6" [shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"];
+  "n7" [shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"];
+  "n8" [shape=box, style="rounded,filled", fillcolor="#e6f2ff", label="ACT"];
+  "n1" -> "n2";
+  "n2" -> "n3";
+  "n3" -> "n4";
+  "n3" -> "n5";
+  "n4" -> "n7";
+  "n5" -> "n6";
+  "n6" -> "n4";
+  "n7" -> "n8";
+}
