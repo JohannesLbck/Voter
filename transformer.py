@@ -181,7 +181,6 @@ async def vote_syncing_before(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
         instance_id = str(notification["instance"])
-        print(notification)
         caller_id = notification["content"]["activity"] 
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)
@@ -202,7 +201,6 @@ async def vote_syncing_after(request: Request):
     async with request.form() as form:
         notification = json.loads(form["notification"])
         instance_id = str(notification["instance"])
-        print(form)
         caller_id = notification["content"]["activity"] 
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)

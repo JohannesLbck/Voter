@@ -197,16 +197,53 @@ class Jobs:
         """Dispatch a list of jobs to the appropriate handler based on phase ('before' or 'after')."""
         dispatch = self.BEFORE_DISPATCH if phase == "before" else self.AFTER_DISPATCH
         return_jobs = {}
-        for job in jobs:
+
+        # Normalize persisted payload shape.
+        # jobs can be: list[dict], dict, JSON string, or invalid data.
+        normalized_jobs = []
+        if isinstance(jobs, dict):
+            normalized_jobs = [jobs]
+        elif isinstance(jobs, list):
+            normalized_jobs = jobs
+        elif isinstance(jobs, str):
+            try:
+                parsed = json.loads(jobs)
+                if isinstance(parsed, dict):
+                    normalized_jobs = [parsed]
+                elif isinstance(parsed, list):
+                    normalized_jobs = parsed
+                else:
+                    logger.warning(f'Unsupported jobs payload type after JSON parse: {type(parsed).__name__}')
+                    return {}
+            except Exception:
+                logger.warning(f'Unsupported jobs payload string in phase "{phase}": {jobs}')
+                return {}
+        else:
+            logger.warning(f'Unsupported jobs payload type in phase "{phase}": {type(jobs).__name__}')
+            return {}
+
+        for job in normalized_jobs:
+            if not isinstance(job, dict):
+                logger.warning(f'Skipping malformed job entry of type {type(job).__name__}: {job}')
+                continue
             if job.get("Phase") != phase:
                 logger.debug(f'Skipping job with mismatched phase: expected "{phase}", got "{job.get("Phase")}"')
                 continue
             pattern = job.get("Pattern")
+            if not isinstance(pattern, str):
+                logger.warning(f'Skipping job with invalid Pattern type: {pattern}')
+                continue
             method_name = dispatch.get(pattern)
             if method_name is None:
                 logger.warning(f'No handler for pattern "{pattern}" in phase "{phase}"')
                 continue
             return_job = getattr(self, method_name)(job, callback)
             if return_job is not None:
-                return_jobs[return_job["CallerID"]] = return_job
+                caller_id = return_job.get("CallerID")
+                if caller_id is None:
+                    logger.warning(f'Returned job missing CallerID: {return_job}')
+                    continue
+                if caller_id not in return_jobs:
+                    return_jobs[caller_id] = []
+                return_jobs[caller_id].append(return_job)
         return return_jobs
