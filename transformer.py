@@ -138,7 +138,6 @@ async def transform(request: Request):
         except:
             logger.error("No requirements were passed in the notification, cannot perform transformation without requirements")
         requirements = parse_requirements(req)
-        print(notification)
         xml = ET.fromstring(notification["content"]["description"])
         xml = add_start_end(xml)
         xml= combine_sub_trees(xml)[0]
@@ -185,7 +184,6 @@ async def vote_syncing_before(request: Request):
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)
         callback = form["callback"]
-        print("Reached vote_syncing_before with hash_key:", hash_key)
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
             return  Response(content="true", media_type="text/plain")
