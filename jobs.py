@@ -54,8 +54,12 @@ class Jobs:
                     logger.error(f'Failed to abandon {pattern_name} instance {target}: {put_response.status_code} {put_response.text}')
                 else:
                     logger.info(f'Abandoned {pattern_name} instance {target}')
-            else:
-                logger.info(f'No state transition needed for {pattern_name} instance {target} in state: {state}')
+            elif state in {"finished"}:
+                put_response = requests.put(state_url, headers=headers, data="value=abandoned")
+                if put_response.status_code >= 400:
+                    logger.error(f'Failed to abandon {pattern_name} instance {target} in finished state: {put_response.status_code} {put_response.text}')
+                else:
+                    logger.info(f'Abandoned {pattern_name} instance {target} in finished state')
         except Exception as e:
             logger.error(f'Failed to abandon {pattern_name} instance {target}: {e}')
 

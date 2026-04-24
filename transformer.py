@@ -185,6 +185,7 @@ async def vote_syncing_before(request: Request):
         hash_key = f"{caller_id}{instance_id}"
         jobs = hash_t.get(hash_key)
         callback = form["callback"]
+        print("Reached vote_syncing_before with hash_key:", hash_key)
         if jobs == "No record found":
             logger.info(f'No jobs found for hash key {hash_key}, skipping voting')
             return  Response(content="true", media_type="text/plain")
