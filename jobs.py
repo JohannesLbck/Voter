@@ -71,8 +71,9 @@ class Jobs:
     def _send_abandon_message(self, job, pattern_name):
         """Send abandon notification message to correlator receive endpoint."""
         target = job.get("target")
+        instance_id = job.get("instance_id")
         if not target:
-            logger.warning(f'No target for message-based abandon of {pattern_name}: {job}')
+            logger.warning(f'No target for message-based abandon of {pattern_name} (instance_id={instance_id}): {job}')
             return
 
         payload = {
@@ -84,13 +85,13 @@ class Jobs:
             response = requests.post(MESSAGE_RECEIVE_URL, data=payload)
             if response.status_code >= 400:
                 logger.error(
-                    f'Failed sending abandon message for {pattern_name} target={target}: '
+                    f'Failed sending abandon message for {pattern_name} instance={instance_id} target={target}: '
                     f'{response.status_code} {response.text}'
                 )
             else:
-                logger.info(f'Sent abandon message for {pattern_name} target={target}')
+                logger.info(f'Sent abandon message for {pattern_name} instance={instance_id} target={target}')
         except Exception as e:
-            logger.error(f'Failed sending abandon message for {pattern_name} target={target}: {e}')
+            logger.error(f'Failed sending abandon message for {pattern_name} instance={instance_id} target={target}: {e}')
 
     # --- vote_syncing_before jobs ---
 
@@ -154,22 +155,22 @@ class Jobs:
 
     def abandon_max_exec_time(self, job, callback):
         """Abandon instance of a max exec time pattern."""
-        logger.info(f'Abandon max exec time instance: {job}')
+        logger.info(f'Abandon max exec time instance_id={job.get("instance_id")} target={job.get("target")}')
         self._send_abandon_message(job, "max_exec_time")
 
     def abandon_recurring(self, job, callback):
         """Abandon instance of a recurring pattern."""
-        logger.info(f'Abandon recurring instance: {job}')
+        logger.info(f'Abandon recurring instance_id={job.get("instance_id")} target={job.get("target")}')
         self._send_abandon_message(job, "recurring")
 
     def abandon_wait_for_event(self, job, callback):
         """Abandon instance of a wait for event pattern."""
-        logger.info(f'Abandon wait for event instance: {job}')
+        logger.info(f'Abandon wait for event instance_id={job.get("instance_id")} target={job.get("target")}')
         self._abandon_instance(job.get("instance_id", job.get("target")), "wait for event")
 
     def abandon_wait_for_timeout(self, job, callback):
         """Abandon instance of a wait for timeout pattern."""
-        logger.info(f'Abandon wait for timeout instance: {job}')
+        logger.info(f'Abandon wait for timeout instance_id={job.get("instance_id")} target={job.get("target")}')
         self._abandon_instance(job.get("instance_id", job.get("target")), "wait for timeout")
 
     def check_wait_for_event(self, job, callback):
