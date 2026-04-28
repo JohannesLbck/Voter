@@ -29,10 +29,6 @@ def _in_separate_branches(tree, ele1, ele2):
             parallel_count += 1
     return None
 
-
-## Currently the following 3 methods all do the exact same thing, keep them as 3 for now, in case I find a reason to separate them later
-## Also makes testing easier
-
 def max_exec_time_modify(tree, a_ele, b_ele, time):
     '''
     This function modifies the tree such that, if the max execution time constraint is explicitly enforced, then the parallel
@@ -44,7 +40,7 @@ def max_exec_time_modify(tree, a_ele, b_ele, time):
         if timeout_call is None:
             continue
         if _in_separate_branches(tree, timeout_call, a_ele) is not None:
-            print(f'Found timeout call with id {timeout_call.get("id", "unknown")} in separate branch from a_ele with id {a_ele.get("id", "unknown")}')
+            logger.info(f'Found timeout call with id {timeout_call.get("id", "unknown")} in separate branch from a_ele with id {a_ele.get("id", "unknown")}')
             if not timeout[1].isdigit():
                 logger.warning(f"Time value {timeout[1]} is not a digit, Assume this is the correct timeout")
                 return remove_timeout(tree, timeout)

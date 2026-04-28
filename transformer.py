@@ -235,7 +235,7 @@ if __name__ == "__main__":
     _configure_logging(args.verbose)
 
     if os.path.exists('transformer.pid'):
-      with open("transformer.pid","r") as f: pid =f.read()
+      with open("transformer.pid","r") as f: pid =f.read() 
       logger.info('Killing ' + str(int(pid)))
       os.remove('transformer.pid')
       os.kill(int(pid),signal.SIGINT)
