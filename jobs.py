@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 SUBPROCESS_URL = "https://cpee.org/flow/start/xml/"
 ENGINE_URL = "https://cpee.org/flow/engine"
-MESSAGE_RECEIVE_URL = "https-post://cpee.org/ing/correlators/message/send/"
+MESSAGE_RECEIVE_URL = "https://cpee.org/ing/correlators/message/send/"
 
 
 class Jobs:
