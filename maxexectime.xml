@@ -5,6 +5,7 @@
         <timeout>https-post://cpee.org/services/timeout.php</timeout>
         <subprocess>https-post://cpee.org/flow/start/url/</subprocess>
         <alternative>TaskA</alternative>
+      <receive>https-get://cpee.org/ing/correlators/message/receive/</receive>
     </endpoints>
     <attributes>
         <guarded>none</guarded>
@@ -21,88 +22,148 @@
     </attributes>
     <description>
         <description xmlns="http://cpee.org/ns/description/1.0">
+        <parallel eid="e1" wait="-1" cancel="last">
+          <parallel_branch>
             <call id="a1" endpoint="timeout">
-                <parameters>
-                    <label>Max Time</label>
-                    <color/>
-                    <arguments>
-                        <timeout>200</timeout>
-                        <data/>
-                    </arguments>
-                </parameters>
-                <annotations>
-                    <_generic/>
-                    <_logging_behavior>
-                        <_exclude>false</_exclude>
-                        <_include>false</_include>
-                    </_logging_behavior>
-                    <_timing>
-                        <_timing_weight/>
-                        <_timing_avg/>
-                        <explanations/>
-                    </_timing>
-                    <_shifting>
-                        <_shifting_type>Duration</_shifting_type>
-                    </_shifting>
-                    <_context_data_analysis>
-                        <probes/>
-                        <ips/>
-                    </_context_data_analysis>
-                    <report>
-                        <url/>
-                    </report>
-                    <_notes>
-                        <_notes_general/>
-                    </_notes>
-                </annotations>
-                <documentation>
-                    <input/>
-                    <output/>
-                    <implementation>
-                        <description/>
-                    </implementation>
-                </documentation>
+              <parameters>
+                <label>Max Time</label>
+                <color/>
+                <arguments>
+                  <timeout>200</timeout>
+                  <data/>
+                </arguments>
+              </parameters>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+              </documentation>
             </call>
             <call id="a2" endpoint="alternative">
-                <parameters>
-                    <label>Alternative</label>
-                    <color/>
-                    <method>:post</method>
-                    <arguments/>
-                </parameters>
-                <annotations>
-                    <_generic/>
-                    <_logging_behavior>
-                        <_exclude>false</_exclude>
-                        <_include>false</_include>
-                    </_logging_behavior>
-                    <_timing>
-                        <_timing_weight/>
-                        <_timing_avg/>
-                        <explanations/>
-                    </_timing>
-                    <_shifting>
-                        <_shifting_type>Duration</_shifting_type>
-                    </_shifting>
-                    <_context_data_analysis>
-                        <probes/>
-                        <ips/>
-                    </_context_data_analysis>
-                    <report>
-                        <url/>
-                    </report>
-                    <_notes>
-                        <_notes_general/>
-                    </_notes>
-                </annotations>
-                <documentation>
-                    <input/>
-                    <output/>
-                    <implementation>
-                        <description/>
-                    </implementation>
-                </documentation>
+              <parameters>
+                <label>Alternative</label>
+                <color/>
+                <method>:post</method>
+                <arguments/>
+              </parameters>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+              </documentation>
             </call>
+          </parallel_branch>
+          <parallel_branch>
+            <call id="a3" endpoint="receive">
+              <parameters>
+                <label/>
+                <color/>
+                <arguments>
+                  <id>target1</id>
+                  <ttl>0</ttl>
+                  <delete>true</delete>
+                </arguments>
+              </parameters>
+              <code>
+                <signal>false</signal>
+                <prepare/>
+                <finalize output="result"/>
+                <update output="result"/>
+                <rescue output="result"/>
+              </code>
+              <annotations>
+                <_generic/>
+                <_logging_behavior>
+                  <_exclude>false</_exclude>
+                  <_include>false</_include>
+                </_logging_behavior>
+                <_timing>
+                  <_timing_weight/>
+                  <_timing_avg/>
+                  <explanations/>
+                </_timing>
+                <_shifting>
+                  <_shifting_type>Duration</_shifting_type>
+                </_shifting>
+                <_context_data_analysis>
+                  <probes/>
+                  <ips/>
+                </_context_data_analysis>
+                <report>
+                  <url/>
+                </report>
+                <_notes>
+                  <_notes_general/>
+                </_notes>
+              </annotations>
+              <documentation>
+                <input/>
+                <output/>
+                <implementation>
+                  <description/>
+                </implementation>
+                <code>
+                  <description/>
+                </code>
+              </documentation>
+            </call>
+            <terminate eid="e2" abandon="true"/>
+          </parallel_branch>
+        </parallel>
         </description>
     </description>
     <transformation>

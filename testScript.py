@@ -1,8 +1,8 @@
 from patterns import MaxExecTime, Recurring, WaitForEvent
 
 def main():
-    maxexectimeXML = MaxExecTime(200, "TaskA")
-    recurringXML = Recurring("CheckID", "TaskB", 200)
+    maxexectimeXML = MaxExecTime(200, "TaskA", "target1")
+    recurringXML = Recurring("CheckID", "TaskB", 200, "target2")
     waitforeventXML = WaitForEvent("TaskID")
     print(maxexectimeXML)
     print(recurringXML)
