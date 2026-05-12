@@ -1,6 +1,6 @@
-# CPEE Compliance Transformation Service
+# VOTER (Voting-based Orchestration for Temporal Enforcement at Runtime)
 
-This project provides a service for automating process model modifications to ensure compliance within the Cloud Process Execution Engine (CPEE). It employs a two-phase approach to compliance: ex-ante transformation and runtime enforcement via a voting mechanism.
+This project provides a service for voting based compliance enforcement of temporal constraints in process orchestrations. It employs a two-phase approach to compliance connected with the Cloud Process Execution Engine (CPEE): ex-ante transformation and runtime enforcement via a voting mechanism.
 
 ## Overview
 
