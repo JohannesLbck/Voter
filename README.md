@@ -68,3 +68,7 @@ python3 local_test_script.py
 ```
 
 This will process XML files in the `Inputs/` directory and generate modified versions in the `Outputs/` directory.
+
+## Documentation
+
+- [MaintanceAnalysis.md](MaintanceAnalysis.md): Short maintenance-effort analysis comparing VOTER-based enforcement with explicit enforcement under model and constraint changes.
